@@ -1,0 +1,217 @@
+*{box-sizing:border-box}body{margin:0;background:#101a17;color:#e9f2e7;font:15px system-ui,Segoe UI,sans-serif}.layout{max-width:1050px;margin:28px auto;padding:0 18px}header,footer{display:flex;align-items:center;justify-content:space-between;gap:20px}header{margin-bottom:18px}.eyebrow{color:#9bc9a4;letter-spacing:.2em;font-size:11px;font-weight:700}h1{font-family:Georgia,serif;font-size:35px;margin:4px 0}.hint,footer{color:#b1c1b5;font-size:13px}kbd{background:#30463b;border:1px solid #5a7563;border-radius:4px;padding:3px 7px;margin:0 2px;color:white}.game{position:relative;border:5px solid #354e3d;border-radius:13px;overflow:hidden;box-shadow:0 18px 55px #0008;background:#314e35}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}.hud,.location,.toast{position:absolute;background:#16231cdb;border:1px solid #66856a;border-radius:8px}.hud{top:15px;left:15px;display:flex;gap:12px;padding:10px 14px;min-width:210px}.hud small{color:#c3d6c2;font-size:11px}.avatar{background:#486b50;padding:11px;border-radius:6px;font-size:24px}.bar{background:#49342e;width:140px;height:10px;margin:7px 0 2px;border-radius:4px;overflow:hidden}.bar span{display:block;background:#db6b62;width:100%;height:100%}.location{top:15px;right:15px;padding:10px 13px;font-size:12px}.toast{left:50%;bottom:22px;transform:translateX(-50%);padding:10px 15px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}.toast.show{opacity:1}footer{padding:15px 2px}.mobile-controls{display:none;text-align:center;margin-top:15px}.mobile-controls button{background:#314b3a;color:#fff;border:1px solid #7da887;border-radius:8px;width:55px;height:46px;margin:3px;touch-action:none}@media(max-width:750px){header{display:block}.hint{margin-top:12px}.location{top:auto;bottom:12px;right:12px}.hud{transform:scale(.8);transform-origin:top left}.mobile-controls{display:block}footer{font-size:11px}}
+
+.xp-bar{background:#344b3e;width:140px;height:5px;margin:5px 0 2px;border-radius:3px;overflow:hidden}.xp-bar span{display:block;width:0;background:#d9b968;height:100%}.wallet{font-size:11px;margin-top:6px;color:#ead7a6}.battle{position:absolute;inset:0;z-index:5;background:#101a17e8;display:grid;place-items:center;padding:15px}.hidden{display:none!important}.battle-panel{width:min(680px,100%);background:#203128;border:2px solid #66856a;border-radius:12px;box-shadow:0 15px 60px #0009;overflow:hidden}.battle-heading{display:flex;justify-content:space-between;align-items:center;padding:15px 22px;background:#293e31;gap:12px}.battle-heading h2{margin:4px 0;font:27px Georgia,serif}.battle-heading span{font-size:12px;color:#c2d4c1}.enemy-health{text-align:right}.enemy-health .bar{width:140px;margin-left:auto}.battle-stage{display:flex;align-items:center;justify-content:space-around;min-height:185px;background:#3e5b42;padding:15px}.fighter{display:flex;align-items:center;flex-direction:column;gap:5px}.fighter-art{font-size:60px;filter:drop-shadow(0 6px 2px #0004)}.fighter span{font-size:12px}.versus{color:#e7d2a2;font:bold 19px Georgia,serif}.battle-bottom{padding:15px 20px}.battle-log{height:88px;overflow-y:auto;background:#14221b;border:1px solid #49624d;padding:8px 12px;font-size:12px;line-height:1.65;margin-bottom:12px}.battle-log p{margin:2px 0}.battle-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.battle-actions button,.continue{padding:11px;background:#385840;border:1px solid #7da887;color:#fff;border-radius:7px;font-weight:650;cursor:pointer}.battle-actions button:hover:not(:disabled),.continue:hover{background:#507459}.battle-actions button:disabled{opacity:.45;cursor:wait}.continue{width:100%;background:#8c6c38}.battle-result{font-weight:700;color:#f4d389}@media(max-width:600px){.battle{padding:5px}.battle-heading{padding:8px 12px}.battle-stage{min-height:125px}.fighter-art{font-size:38px}.battle-bottom{padding:8px}.battle-log{height:65px}.battle-actions button{padding:8px}.battle-heading h2{font-size:20px}}
+
+/* Etapa 3: inventário */
+.inventory-toggle{position:absolute;z-index:2;right:15px;top:59px;background:#1e3227;color:#eaf5e9;border:1px solid #8aa98b;padding:9px 13px;border-radius:7px;cursor:pointer;font-weight:650}.inventory{position:absolute;inset:0;z-index:6;background:#101a17ec;display:grid;place-items:center;padding:12px}.inventory-panel{width:min(800px,100%);max-height:100%;overflow-y:auto;background:#203128;border:2px solid #66856a;border-radius:12px}.inventory-heading{padding:13px 18px;background:#293e31;display:flex;justify-content:space-between;align-items:center;gap:10px}.inventory-heading h2{margin:3px 0;font:25px Georgia,serif}.inventory-heading small{font:13px system-ui;color:#b7ceb8}.inventory-heading button,.inventory-actions button{background:#385840;color:white;border:1px solid #7da887;border-radius:6px;padding:9px;cursor:pointer}.inventory-content{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;padding:16px}.inventory-content h3{font-size:14px;margin:4px 0 12px;color:#c9ddc8}.inventory-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.item-slot{height:48px;background:#14251b;color:#a4b6a8;border:1px solid #42594a;border-radius:6px;font-size:23px;cursor:pointer}.item-slot:disabled{opacity:.55;cursor:default}.inventory-note{font-size:11px;color:#b6c8b7;line-height:1.5}.equip-row{display:block;width:100%;margin-bottom:5px;text-align:left;background:#182b20;border:1px solid #45614c;border-radius:5px;color:#dce8dc;padding:7px;font-size:12px;cursor:pointer}.equip-row:disabled{opacity:.7;cursor:default}.rarity-common{border-color:#84948a}.rarity-uncommon{border-color:#5abf7c}.rarity-rare{border-color:#4e98e9}.rarity-epic{border-color:#bd7aef}.rarity-legendary{border-color:#f0b84f}.rarity-mythic{border-color:#f06e78}.selected{outline:2px solid #fff;outline-offset:1px}.item-details{min-height:90px;background:#14251b;border:1px solid #42594a;border-radius:6px;margin-top:12px;padding:10px;font-size:12px}.item-details p{margin:5px 0}.inventory-actions{display:flex;gap:8px;margin-top:9px}.inventory-actions button{flex:1}.inventory-actions button:disabled{opacity:.4;cursor:default}#stats-list{font-size:13px;margin-bottom:8px}@media(max-width:620px){.inventory-content{grid-template-columns:1fr;gap:8px}.inventory-panel{max-height:100%}.item-slot{height:38px}.inventory-toggle{top:auto;bottom:50px;right:10px;font-size:11px;padding:7px}}
+
+/* Etapa 4: atributos e barra de magia */
+.mp-bar{height:5px;background:#25364e;border-radius:4px;overflow:hidden;margin-top:5px}.mp-bar span{display:block;height:100%;width:100%;background:#6d9fe8}
+.character-toggle{position:absolute;right:16px;top:64px;z-index:4;border:1px solid #65735d;background:#1f3329;color:#f4ead2;border-radius:8px;padding:9px 13px;cursor:pointer}
+.character{position:absolute;inset:0;z-index:12;background:#07100bd9;display:flex;align-items:center;justify-content:center;padding:16px}.character.hidden{display:none}.character-panel{width:min(510px,100%);background:#18251e;color:#f4ead2;border:1px solid #69866a;border-radius:14px;padding:22px;box-shadow:0 20px 60px #0008}.stat-rows{display:grid;gap:9px;margin:16px 0}.stat-rows>div{display:flex;align-items:center;gap:12px;justify-content:space-between;background:#25362b;border-radius:8px;padding:10px}.stat-rows strong{margin-left:auto}.stat-rows button{background:#81ad75;border:0;border-radius:6px;padding:7px 13px;font-weight:bold;cursor:pointer}.stat-rows button:disabled{opacity:.35;cursor:not-allowed}#derived-stats{line-height:1.7;color:#e4d4a8}
+
+/* Etapa 6 — loja */
+.shop-toggle{position:absolute;right:15px;top:110px;z-index:4;background:#58462e;border:1px solid #d2a963;border-radius:7px;color:#fff;padding:9px 12px;cursor:pointer}.shop{position:absolute;inset:0;z-index:15;background:#07100be8;display:grid;place-items:center;padding:15px}.shop-panel{background:#203128;border:2px solid #a78a52;border-radius:12px;width:min(650px,100%);max-height:100%;overflow-y:auto;padding:0 16px 15px}.shop-panel .inventory-heading{margin:0 -16px 12px}.shop-panel h2{margin:3px 0;font:24px Georgia,serif}.shop-items{display:grid;gap:8px}.shop-item{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#15251b;border:1px solid #4b614b;border-radius:8px;padding:10px}.shop-item small{display:block;color:#b7c9b7;margin-top:4px}.shop-item button{white-space:nowrap;background:#755b30;color:#fff;border:1px solid #b99a59;border-radius:6px;padding:9px;cursor:pointer}.shop-item button:disabled{opacity:.4;cursor:not-allowed}.shop-panel .inventory-heading button{background:#385840;color:white;border:1px solid #7da887;border-radius:6px;padding:9px;cursor:pointer}#shop-message{color:#e6d08b}@media(max-width:620px){.shop-toggle{top:auto;bottom:87px;right:10px;font-size:11px;padding:7px}.shop-item{font-size:12px}}
+
+.affix-line{color:#f3d58b;font-weight:700;line-height:1.5}.shop-item small{display:block;margin-top:3px}
+
+/* Etapa 8 — mapa em tela cheia, painéis laterais estilo RPG clássico */
+html,body{width:100%;height:100%;overflow:hidden}.layout{width:100vw;height:100dvh;max-width:none;margin:0;padding:0;position:relative}header,footer{display:none}.game{width:100%;height:100%;border:0;border-radius:0;box-shadow:none}canvas{width:100%;height:100%;object-fit:fill}.hud{z-index:3;top:12px;left:12px;transform:scale(.88);transform-origin:top left}.location{top:12px;right:12px;z-index:3}.inventory-toggle,.character-toggle,.shop-toggle,.smith-toggle{z-index:4;right:12px;top:auto;bottom:12px}.character-toggle{right:160px}.shop-toggle{right:300px}.smith-toggle{right:435px;background:#4a3930;border:1px solid #d0a66c;color:#fff;border-radius:7px;padding:9px 12px;cursor:pointer}.inventory,.character{background:transparent;pointer-events:none;display:block;padding:0;z-index:10}.inventory-panel,.character-panel{pointer-events:auto;position:absolute;top:50px;max-height:calc(100dvh - 110px);overflow-y:auto;background:#1b211feF;border:2px solid #777b72;border-radius:5px;box-shadow:0 8px 32px #000b;padding:0}.inventory-panel{right:14px;width:340px}.character-panel{left:14px;width:310px;padding:0 12px 14px}.inventory-heading{padding:9px 11px;background:#2b302e}.inventory-heading h2{font:20px Georgia,serif}.inventory-content{display:flex;flex-direction:column;gap:5px;padding:9px}.inventory-content h3{font-size:12px;margin:5px 0}.inventory-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}.item-slot{height:43px;position:relative;border-radius:2px;font-size:21px}.slot-refine{position:absolute;bottom:1px;right:2px;font-size:9px;color:#ffe19b}.inventory-side{font-size:11px}.equip-row{display:inline-block;width:calc(50% - 4px);margin:2px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-details{min-height:0;margin-top:5px;padding:7px}.inventory-note{margin:4px 0}.character-panel .inventory-heading{margin:0 -12px 8px}.character-panel .stat-rows{gap:4px;margin:9px 0}.stat-rows>div{padding:6px 7px;font-size:12px}.stat-rows button{padding:4px 9px}.panel-help{font-size:11px;color:#b5c6b5}.character-panel #derived-stats{font-size:12px}.shop{z-index:16}.item-tooltip{position:fixed;z-index:100;pointer-events:none;width:242px;padding:12px;background:rgba(10,16,20,.92);border:1px solid #a8a18a;box-shadow:0 8px 28px #000b;border-radius:4px;color:#e8eadc;font-size:12px;line-height:1.65}.tip-name{font-size:14px;font-weight:800}.tip-meta{color:#b8c4b8}.tip-power{color:#fff}.tip-bonus{color:#e8c56c;margin-top:5px}.tip-requirements{margin-top:7px;border-top:1px solid #536057;padding-top:5px}.tip-status,.require-ok{color:#91dfa6}.require-no{color:#f0a09b}.rarity-text-rare{color:#73b7ff}.rarity-text-epic{color:#d2a0ff}.rarity-text-legendary{color:#ffcd6b}.rarity-text-mythic{color:#ff8888}.smith-items{display:grid;gap:6px}.smith-panel{width:min(640px,95vw)}#smith-message{color:#eacb82}@media(max-width:760px){.inventory-panel{right:5px;top:58px;width:min(335px,94vw)}.character-panel{left:5px;top:58px;width:min(300px,90vw)}.mobile-controls{display:none}.inventory-toggle,.character-toggle,.shop-toggle,.smith-toggle{bottom:8px;right:auto;font-size:10px;padding:6px}.inventory-toggle{left:5px}.character-toggle{left:105px}.shop-toggle{left:208px}.smith-toggle{left:290px}.hud{transform:scale(.68)}.location{top:6px;right:6px;font-size:10px}}
+
+/* Etapa 9 — Equipamentos em cima, bolsa embaixo; HUD não pausa a simulação */
+.inventory-panel{width:300px;max-height:calc(100dvh - 85px)}
+.inventory-content{display:flex;flex-direction:column;padding:7px;gap:7px}
+.inventory-side{order:0;display:flex;flex-direction:column}
+.bag-section{order:1;border-top:1px solid #69736b;padding-top:8px}
+#equipment-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:5px 0 9px}
+.equip-row{width:100%;height:55px;margin:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2px;position:relative;overflow:hidden;border-radius:2px}
+.equip-row:disabled{opacity:.65}.equip-slot-icon{font-size:23px;line-height:25px}.equip-row small{font-size:9px;color:#aab9aa}.equip-row b{position:absolute;right:2px;top:1px;font-size:10px;color:#f4ce65}
+.inventory-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}.item-slot{height:38px}
+#stats-list{font-size:10px;line-height:1.35}#item-details{font-size:10px;max-height:105px;overflow:auto}
+.inventory-note{font-size:10px}.inventory-actions button{padding:5px}
+.confirm-discard{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:#0005;pointer-events:auto}.confirm-card{width:min(310px,92vw);padding:20px;background:#1b2521;border:2px solid #b5a27c;box-shadow:0 14px 55px #000b;border-radius:8px;color:#fff}.confirm-card h3{margin:0 0 12px}.confirm-card div{display:flex;gap:9px;justify-content:flex-end}.confirm-card button{background:#334c3a;border:1px solid #829d82;color:#fff;border-radius:5px;padding:8px 12px;cursor:pointer}
+.skill-bar{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:5px;pointer-events:auto}.skill-bar button{padding:8px;background:#203329e8;border:1px solid #9a9c72;color:#f4eacb;border-radius:5px;white-space:nowrap;cursor:pointer;font-size:11px}.skill-bar button:disabled{opacity:.5}.item-tooltip{z-index:40}
+@media(max-width:720px){.skill-bar{bottom:44px;left:50%;max-width:96vw;overflow-x:auto}.skill-bar button{font-size:9px;padding:5px}.inventory-panel{width:270px}.item-slot{height:33px}}
+
+/* Etapa 10 */
+.skill-bar{bottom:12px;max-width:min(850px,calc(100vw - 32px));width:max-content;display:flex;gap:4px;background:#111b18e8;border:1px solid #637c69;padding:6px;border-radius:7px}.skill-bar .skill-cell{width:90px;min-width:72px;height:69px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;padding:4px;background:#26382e;border:1px solid #8f9e83}.skill-cell .skill-icon{font-size:23px}.skill-cell small{font-size:9px;max-width:100%;white-space:normal;line-height:1.15}.skill-cell em{position:absolute;inset:0;background:#0b1515b9;display:grid;place-items:center;font-size:18px;font-weight:bold;font-style:normal}.derived-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}.derived-grid>div{display:flex;flex-direction:column;background:#25352b;padding:6px;border-radius:4px}.derived-grid span{font-size:10px;color:#b3c8b7}.derived-grid strong{font-size:12px;color:#f1e9cc}.character-panel{max-height:calc(100dvh - 105px)}@media(max-width:800px){.skill-bar{bottom:42px;overflow-x:auto;max-width:94vw}.skill-bar .skill-cell{min-width:68px;height:60px}.skill-cell small{font-size:8px}}
+
+/* Etapa 11: janelas não modais, com combate ativo ao fundo */
+.shop{background:transparent!important;pointer-events:none!important;display:block!important;padding:0!important;z-index:12!important}
+.shop.hidden{display:none!important}
+.shop-panel{pointer-events:auto;position:absolute;top:70px;right:14px;width:min(430px,92vw);max-height:calc(100dvh - 135px);overflow:auto;background:rgba(24,31,28,.96);border:1px solid #8e917c;border-radius:6px;box-shadow:0 10px 35px #0009}
+.smith-panel{right:14px;width:min(440px,92vw)}
+#skill-shop .shop-panel{right:14px;width:min(430px,92vw)}
+.rarity-veryrare{border-color:#36c7cb!important;box-shadow:inset 0 0 5px #36c7cb50}
+.rarity-legendary{border-color:#f2c34d!important;box-shadow:inset 0 0 8px #d6a32888}
+.rarity-text-veryrare{color:#63dce1}.rarity-text-legendary{color:#ffd15e}
+#item-details{display:none!important}
+.auto-toggle{position:absolute;z-index:5;bottom:58px;right:12px;background:#263f43;color:#dcf8ee;border:1px solid #80b8af;border-radius:5px;padding:9px 12px;cursor:pointer}
+@media(max-width:760px){.auto-toggle{bottom:45px;right:10px}.shop-panel{top:80px;right:5px}}
+
+/* Etapa 13: ferreiro destaca os itens equipados no início da lista */
+.smith-equipped{border:2px solid #e9bc58!important;background:rgba(111,83,29,.27)!important;box-shadow:inset 3px 0 #f4c66b}
+.equipped-tag{display:inline-block;margin-left:9px;padding:2px 6px;border:1px solid #eac46d;border-radius:4px;background:#594721;color:#ffe3a0;font-size:10px;font-weight:800;vertical-align:middle}
+.smith-item:not(.smith-equipped){opacity:.93}
+#item-discard-all{background:#58332f;border-color:#b77c6e}
+#item-discard-all:not(:disabled):hover{background:#79433b}
+.inventory-actions{flex-wrap:wrap}.inventory-actions button{flex:1 1 29%;font-size:11px}
+
+.catalog-link{display:inline-block;padding:7px 11px;border:1px solid #c7a65b;border-radius:7px;background:#30291e;color:#ffe3a0;text-decoration:none;font-weight:700}.catalog-link:hover{background:#493b24}
+
+/* Etapa 16: ícones individuais e catálogo dentro do jogo */
+.item-art{display:inline-block;width:29px;height:29px;object-fit:contain;vertical-align:middle;image-rendering:auto;flex-shrink:0;border-radius:4px}
+.item-slot .item-art{width:30px;height:30px}.equip-slot-icon .item-art{width:26px;height:26px}.tooltip-art{width:31px;height:31px;vertical-align:middle;margin-right:5px}
+.catalog-ingame{position:absolute;left:12px;top:150px;z-index:12;box-shadow:0 3px 12px #0008;font-size:12px;pointer-events:auto}
+@media(max-width:750px){.catalog-ingame{top:126px;left:5px;padding:5px 7px;font-size:10px}}
+
+/* Etapa 20: ícones maiores e loja com arte */
+.shop-art{width:48px;height:54px;object-fit:contain;vertical-align:middle;margin-right:9px;filter:drop-shadow(0 2px 2px #0008)}
+.shop-item strong{display:flex;align-items:center;gap:4px;font-size:13px}
+.item-art{object-fit:contain;image-rendering:auto}
+.shop-item{min-height:69px}
+
+/* Etapa 23: criação de personagem em tela cheia */
+.creation-screen{position:absolute;inset:0;z-index:110;background:linear-gradient(135deg,#101e18f5,#14271ef9);display:grid;place-items:center;padding:18px;overflow:auto;pointer-events:auto}.creation-screen.hidden{display:none}.creation-panel{width:min(690px,96vw);background:#1e3026;border:2px solid #8eaa81;border-radius:14px;padding:30px;box-shadow:0 22px 90px #000c;color:#edf3e8}.creation-panel h1{font-size:32px;margin:10px 0 24px}.creation-panel label{display:block;margin-bottom:8px;font-weight:700}.creation-panel input{width:100%;background:#101c17;color:#fff;border:1px solid #739278;border-radius:7px;padding:13px;font:inherit}.class-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.class-cards button{background:#263d30;border:2px solid #4c6652;border-radius:10px;color:#eaf1e8;cursor:pointer;padding:16px 9px;display:flex;flex-direction:column;align-items:center;gap:7px}.class-cards button.active{border-color:#e2c37b;background:#3b4833}.class-cards button>span{font-size:38px}.class-cards button strong{font-size:16px}.class-cards button small{font-size:11px;color:#bdcdbb}.creation-note{font-size:12px;color:#b8cdb8;line-height:1.6}#creation-error{color:#f4a5a5;min-height:20px}#begin-adventure{width:100%;background:#d1a95d;color:#1a231c;border:0;border-radius:8px;padding:13px;font-size:16px;font-weight:800;cursor:pointer}@media(max-width:540px){.creation-panel{padding:15px}.class-cards{gap:5px}.class-cards button{padding:9px 3px}.class-cards button>span{font-size:25px}.class-cards button strong{font-size:12px}.class-cards button small{font-size:9px}}
+
+/* ETAPA 24 — Inventário estilo WYD: boneco de equipamentos acima da bolsa */
+.inventory-panel{width:322px;background:#191d1aef;border:2px solid #b09b73;box-shadow:0 14px 40px #000c}
+.inventory-heading{background:#342f25;border-bottom:1px solid #9c8761}
+.inventory-content{display:flex;flex-direction:column;gap:9px;padding:10px}
+.inventory-side{order:0;display:flex;flex-direction:column;gap:5px}
+.bag-section{order:1;border-top:2px solid #77694e;padding-top:9px}
+#equipment-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(3,57px);gap:5px;justify-items:stretch;align-items:stretch;padding:12px 8px;background:radial-gradient(ellipse at center,#3d4034 0%,#222921 65%,#151c17 100%);border:1px solid #736f58;border-radius:3px;position:relative;margin:0 0 6px}
+#equipment-list:before{content:'⚔';position:absolute;top:39px;left:calc(50% - 17px);font-size:44px;color:#b8a77a35;pointer-events:none}
+.equip-row{height:57px;width:100%;margin:0;border:1px solid #756c55;background:#151d18e8;z-index:1;position:relative;border-radius:3px}
+.equip-row[data-slot="helmet"]{grid-column:3;grid-row:1}
+.equip-row[data-slot="weapon"]{grid-column:1;grid-row:2}
+.equip-row[data-slot="armor"]{grid-column:3;grid-row:2}
+.equip-row[data-slot="gloves"]{grid-column:5;grid-row:2}
+.equip-row[data-slot="boots"]{grid-column:3;grid-row:3}
+.equip-row[data-slot="ring"]{grid-column:1;grid-row:3}
+.equip-row[data-slot="amulet"]{grid-column:5;grid-row:3}
+.equip-row:not(:disabled){border-color:#d6b968;box-shadow:inset 0 0 0 1px #b9a26550}
+.equip-row:disabled{opacity:.75}
+.equip-row .equip-slot-icon .item-art{width:34px;height:34px}
+.equip-row small{font-size:9px}
+.inventory-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.item-slot{height:42px;background:#111912;border-color:#5e6350}
+.item-slot:hover:not(:disabled),.equip-row:hover:not(:disabled){background:#354333;filter:brightness(1.15)}
+.inventory-summary{font-size:10px;color:#d3c5a5;line-height:1.5}
+.inventory-actions{margin-top:4px}
+.item-tooltip{width:max-content;max-width:min(660px,calc(100vw - 16px));padding:0;background:#101613f7;border:1px solid #c1ad79;box-shadow:0 12px 42px #000e;z-index:150;overflow:hidden}
+.compare-columns{display:grid;grid-template-columns:minmax(220px,1fr) minmax(220px,1fr);gap:0}
+.compare-candidate,.compare-equipped,.comparison-alone{padding:12px;min-width:0;max-width:320px}
+.compare-equipped{border-left:1px solid #756f54;background:#181e19}
+.compare-label{font-size:10px;letter-spacing:1px;font-weight:800;color:#d4b77a;border-bottom:1px solid #615d49;padding-bottom:5px;margin-bottom:8px}
+.compare-stats-title{font-size:10px;color:#c8b995;margin-top:10px;border-top:1px solid #4b5849;padding-top:7px}
+.compare-stat{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;font-size:11px;padding:2px 0}
+.compare-stat span{color:#cdd3c8}.compare-stat small{min-width:52px;text-align:right}
+.compare-worse b,.compare-worse small{color:#ff6767;font-weight:800}
+.compare-better b,.compare-better small{color:#75e19a;font-weight:800}
+.compare-same b,.compare-same small{color:#bdc8bb}
+@media(max-width:600px){.inventory-panel{width:min(322px,94vw)}.item-tooltip{max-width:calc(100vw - 12px);font-size:10px}.compare-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.compare-candidate,.compare-equipped{padding:7px;min-width:0}.compare-stat{grid-template-columns:1fr auto;gap:2px}.compare-stat small{grid-column:2}.tip-name{font-size:11px}}
+
+/* Etapa 25 — identificação inequívoca de item equipado vs. bolsa */
+.item-tooltip .item-is-equipped{box-shadow:inset 0 0 0 2px #d6b45e;background:#262719;}
+.item-tooltip .item-is-bag{box-shadow:inset 0 0 0 2px #638a9b;background:#17252c;}
+.item-tooltip .compare-label-equipped{color:#ffe08b;background:#4b3b16;padding:7px 8px;border-radius:3px;border-bottom:0;}
+.item-tooltip .compare-label-bag{color:#bce6ff;background:#244454;padding:7px 8px;border-radius:3px;border-bottom:0;}
+.item-tooltip .compare-empty{font-size:11px;color:#aab9c2;margin-top:8px;}
+
+/* Etapa 26 — Ficha de personagem em duas abas, inspirada na organização WYD */
+.character-panel.wyd-panel{width:330px;max-height:calc(100dvh - 105px);overflow:auto;background:#1b1917f5;border:2px solid #89765c;color:#e9dfc7;font-family:Arial,sans-serif;box-shadow:0 8px 30px #000c}
+.wyd-panel .inventory-heading{background:linear-gradient(#51402f,#2b211a);border-bottom:1px solid #a08c70;margin:0 -12px 0;padding:9px 12px}
+.wyd-panel .inventory-heading h2{font-size:17px}.wyd-tabs{display:flex;gap:3px;margin:8px 0;border-bottom:1px solid #806d55;padding-bottom:4px}
+.wyd-tabs button{flex:1;cursor:pointer;border:1px solid #78634e;border-radius:3px 3px 0 0;background:#292724;color:#cfc4ac;padding:8px;font-weight:600}
+.wyd-tabs button.active{background:#6b5036;color:#fff0d4;border-color:#d1ac6e}
+.wyd-tab.hidden{display:none}.wyd-identity,.wyd-stat-table{display:grid;gap:2px}.wyd-stat-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:25px;padding:3px 7px;border:1px solid #443e36;background:#252320;border-radius:2px;font-size:12px}
+.wyd-stat-row span{color:#d7ccb6}.wyd-stat-row strong{color:#f3e5b8;font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.wyd-point-head{display:flex;justify-content:space-between;font-size:12px;margin-top:10px;padding:5px;background:#393025;color:#f4dca7}
+.wyd-panel .stat-rows{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:7px 0 11px}.wyd-panel .stat-rows>div{display:flex;align-items:center;gap:5px;justify-content:space-between;background:#302b25;border:1px solid #5b5144;border-radius:3px;padding:5px;font-size:12px}
+.wyd-panel .stat-rows strong{margin-left:auto}.wyd-panel .stat-rows button{background:#7d5e3d;color:#f8e8b6;border:1px solid #c5a170;padding:2px 7px;border-radius:3px}
+.wyd-note{font-size:10px;color:#ac9c7f}.tip-origin{margin:6px 0;padding:5px 7px;background:#27302c;border-left:2px solid #a9b788;color:#d3dfcb;font-size:11px}
+
+/* Etapa 27 — HUD compacto de fantasia inspirado na disposição da referência */
+.hud{top:12px;left:12px;display:flex;align-items:center;gap:0;padding:5px 9px 5px 6px;min-width:290px;width:310px;height:74px;border:2px solid #88725b;border-radius:36px 9px 9px 36px;background:linear-gradient(180deg,#3c302c 0%,#151519 65%,#161719 100%);box-shadow:inset 0 0 0 2px #161315,0 4px 10px #000b;transform:none;z-index:5}
+.hud .avatar{flex:none;display:grid;place-items:center;width:61px;height:61px;border:4px ridge #a89783;border-radius:50%;font-size:27px;color:#f4d2a1;background:radial-gradient(circle at 40% 30%,#a94152,#771e36 60%,#250e1c);box-shadow:inset 0 0 0 3px #22191c,0 0 0 1px #000}
+.hud-info{min-width:0;flex:1;margin-left:9px}.hud-title{display:flex;align-items:center;gap:6px;height:18px;font-size:11px;color:#f7e4c6;white-space:nowrap}.hud-title strong{font-size:12px;max-width:110px;overflow:hidden;text-overflow:ellipsis}.hud-title #level{color:#e9d5ae;font-size:10px}.hud-title #hud-class{margin-left:auto;font-size:9px;color:#cab79b}.hud .bar,.hud .mp-bar{position:relative;width:100%;height:15px;margin:2px 0 0;border:2px solid #78695c;border-radius:5px;background:#251619;overflow:hidden;box-shadow:inset 0 2px 4px #0008}.hud .bar span,.hud .mp-bar span{position:absolute;inset:0 auto 0 0;display:block;height:100%;border-radius:2px}.hud .bar span{background:linear-gradient(180deg,#ff8580,#e31727 55%,#9b0914)}.hud .mp-bar span{background:linear-gradient(180deg,#8fcdff,#126be2 55%,#05359c)}.hud .bar small,.hud .mp-bar small{position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:10px;font-weight:700;text-shadow:1px 1px 2px #000;z-index:1}.hud .xp-bar{position:absolute;top:73px;left:65px;width:239px;height:3px;margin:0}.hud .xp-bar span{background:#d3a84d}.hud #xp-text{display:none}.hud .wallet{position:absolute;top:82px;left:10px;margin:0;padding:3px 7px;background:#171a1acb;border:1px solid #75694b;border-radius:4px;font-size:10px}.hud .hud-info>small{display:none}@media(max-width:760px){.hud{transform:scale(.78);transform-origin:top left}}
+
+/* Etapa 28 */
+.catalog-ingame{left:14px!important;top:auto!important;bottom:112px!important;z-index:5!important}
+.character:not(.hidden)~.catalog-ingame{visibility:hidden}
+.game:has(.character:not(.hidden)) .catalog-ingame{display:none!important}
+.item-tooltip{position:fixed!important;z-index:999!important;background:rgba(9,14,18,.88)!important;backdrop-filter:blur(8px);max-height:calc(100dvh - 16px);overflow:hidden}
+.item-tooltip.comparing{width:min(570px,calc(100vw - 20px))!important}
+.compare-class-warning,.class-blocked{color:#ff7c83!important;font-weight:800;background:rgba(139,21,36,.24);padding:5px;border:1px solid #d54b58;border-radius:4px}
+@media(max-width:750px){.catalog-ingame{bottom:100px!important;left:8px!important}.item-tooltip.comparing{width:min(480px,calc(100vw - 20px))!important}}
+
+/* Etapa 29 — Legibilidade de equipamentos e destaque de raridade. */
+.item-tooltip .tip-power{font-size:17px!important;font-weight:900!important;line-height:1.5;color:#fff1ca!important;letter-spacing:.1px;}
+.item-tooltip .tip-bonus{font-size:14px!important;font-weight:650;line-height:1.75;color:#f6d991!important;}
+.item-tooltip .tip-name{font-size:16px!important;line-height:1.35;}
+.item-tooltip .tip-meta{display:flex;flex-direction:column;align-items:flex-start;gap:5px;margin:7px 0;}
+.item-tooltip .tier-chip{display:inline-block;padding:4px 9px;border:1px solid currentColor;border-radius:5px;font-size:12px;font-weight:900;letter-spacing:.65px;background:rgba(255,255,255,.06);}
+.item-tooltip .tier-common{color:#d0d5d8;background:#30373b;}
+.item-tooltip .tier-uncommon{color:#9ee9a4;background:#153a27;}
+.item-tooltip .tier-rare{color:#91caff;background:#19334d;}
+.item-tooltip .tier-veryrare{color:#76f3f2;background:#124247;}
+.item-tooltip .tier-epic{color:#e1b3ff;background:#40224f;}
+.item-tooltip .tier-legendary{color:#ffdb70;background:#56401b;box-shadow:0 0 10px #d9a52c55;}
+.item-tooltip .tip-slot-meta{font-size:12px;color:#bec9c2;}
+.item-tooltip .compare-stat{font-size:12px;line-height:1.5;}
+@media(max-width:600px){.item-tooltip .tip-power{font-size:15px!important}.item-tooltip .tip-bonus{font-size:12px!important}.item-tooltip .tip-name{font-size:14px!important}}
+
+/* Etapa 30: contornos por raridade, inclusive slots equipados. */
+.item-slot.rarity-common,.equip-row.rarity-common{border:2px solid #94999b!important;box-shadow:inset 0 0 0 1px #94999b35}
+.item-slot.rarity-uncommon,.equip-row.rarity-uncommon{border:2px solid #43bf6a!important;box-shadow:inset 0 0 0 1px #43bf6a35}
+.item-slot.rarity-rare,.equip-row.rarity-rare{border:2px solid #4a9cf2!important;box-shadow:inset 0 0 0 1px #4a9cf235}
+.item-slot.rarity-veryrare,.equip-row.rarity-veryrare{border:2px solid #32d1d3!important;box-shadow:inset 0 0 0 1px #32d1d335}
+.item-slot.rarity-epic,.equip-row.rarity-epic{border:2px solid #b96bfa!important;box-shadow:inset 0 0 0 1px #b96bfa35}
+.item-slot.rarity-legendary,.equip-row.rarity-legendary{border:2px solid #eec34f!important;box-shadow:inset 0 0 9px #eec34f75,0 0 4px #eec34f55}
+.item-slot.selected,.equip-row.selected{outline:2px solid #fff!important;outline-offset:1px}
+
+/* Etapa 34: barra inferior de atalhos e magias */
+.action-hud{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;gap:6px;width:max-content;max-width:calc(100% - 24px);padding:9px 11px;background:rgba(15,24,23,.94);border:1px solid #83947a;border-radius:10px;box-shadow:0 5px 25px #0009;color:#e9eedf;box-sizing:border-box}
+.action-hud-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;font-weight:800;letter-spacing:1px;color:#e7d6a3}.action-hud-heading small{font-size:10px;letter-spacing:0;color:#9dc6a7;font-weight:500}
+.action-hud-content{display:flex;align-items:center;gap:9px;min-width:0}.quick-actions{display:flex;gap:5px}.quick-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:61px;height:65px;border-radius:6px;border:1px solid #788a7b;background:#2b3a33;color:#fff;font-size:23px;cursor:pointer}.quick-actions button:hover{background:#425b4c}.quick-actions small{font-size:10px;white-space:nowrap}.action-hud-divider{height:52px;border-left:1px solid #52685a}
+.action-hud .skill-bar{position:static;transform:none;left:auto;bottom:auto;display:flex;width:auto;max-width:none;overflow-x:auto;gap:4px;padding:0;background:none;border:0;border-radius:0}.action-hud .skill-bar .skill-cell{min-width:65px;width:73px;height:65px;flex-shrink:0}.action-hud .skill-cell small{font-size:9px}
+@media(max-width:850px){.action-hud{bottom:8px;width:calc(100% - 20px)}.action-hud-content{overflow-x:auto}.action-hud .skill-bar{overflow-x:visible}.quick-actions button{min-width:54px}.action-hud .skill-bar .skill-cell{min-width:62px;width:62px}}
+@media(max-width:600px){.action-hud{bottom:46px;padding:6px}.action-hud-heading{font-size:10px}.action-hud .skill-bar .skill-cell{height:56px}.quick-actions button{height:56px}}
+
+/* Etapa 35: controles duplicados ocultos; atalhos disponíveis na HUD inferior */
+#inventory-toggle,#character-toggle,#shop-toggle,#smith-toggle{display:none!important}
+
+/* Etapa 36: lojas integradas à identidade visual da HUD e inventário. */
+.shop{background:rgba(5,12,11,.55);backdrop-filter:blur(3px)}
+.shop .shop-panel{position:absolute;top:50%;left:50%;right:auto;transform:translate(-50%,-50%);width:min(650px,calc(100% - 28px));max-height:min(78vh,700px);padding:0 17px 18px;background:#192820;border:1px solid #9aab8c;border-radius:12px;box-shadow:0 18px 60px #000c, inset 0 1px #ffffff12;color:#f0f2e8;overflow-y:auto}
+.shop .inventory-heading{position:sticky;top:0;z-index:2;margin:0 -17px 12px;padding:14px 17px;background:#24372d;border-bottom:1px solid #657c65;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.shop .inventory-heading h2{font:700 22px Georgia,serif;color:#f4e2ac;margin:3px 0}
+.shop .eyebrow{color:#a7c6a5;font-size:10px;letter-spacing:1.3px;font-weight:800}
+.shop .shop-item{background:#21342a;border:1px solid #4c6954;border-radius:8px;padding:12px;min-height:72px;gap:12px}
+.shop .shop-item:hover{border-color:#c0a96e;background:#283e30}
+.shop .shop-item strong{font-size:14px;color:#f2e6c6;gap:8px}
+.shop .shop-item small{font-size:12px;color:#bacfbc;line-height:1.4}
+.shop .shop-item button{border:1px solid #bda66d;background:#665432;border-radius:7px;color:#fff2ce;font-weight:800;min-width:104px;padding:10px}
+.shop .shop-item button:not(:disabled):hover{background:#877044}
+.shop .shop-item button:disabled{opacity:.52}
+.shop .inventory-note{color:#b9c9b8;line-height:1.5}
+.shop .shop-panel .inventory-heading button{background:#344c3e;border:1px solid #849e82;color:#f0f3e7}
+.auto-skill-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:65px;min-width:78px;border:1px solid #7e8d74;border-radius:6px;background:#354039;color:#e5e9d9;font-size:22px;cursor:pointer}
+.auto-skill-button small{font-size:10px;white-space:nowrap}.auto-skill-button.enabled{background:#385944;border-color:#87db98;color:#c9ffcf;box-shadow:inset 0 0 0 1px #74ba83}
+@media(max-width:600px){.shop .shop-panel{max-height:70vh}.shop .shop-item{flex-wrap:wrap}.auto-skill-button{height:56px;min-width:72px}}
+
+.rules-link{position:absolute;bottom:106px;left:18px;z-index:15;background:#22382d;color:#eed6a0;border:1px solid #b69b67;border-radius:6px;padding:8px 11px;text-decoration:none;font-size:12px;font-weight:700}.rules-link:hover{background:#3b5945}@media(max-width:700px){.rules-link{bottom:145px;left:8px;font-size:10px;padding:6px}}
+
+/* Autenticação online e indicador de conexão */
+.online-gate{position:absolute;inset:0;z-index:250;display:grid;place-items:center;background:#0d1816ef;padding:20px}
+.online-gate.hidden{display:none}
+.online-card{width:min(410px,100%);display:flex;flex-direction:column;gap:12px;padding:28px;border:2px solid #7d956e;border-radius:14px;background:#19271f;color:#f6e9c9;box-shadow:0 16px 50px #0009}
+.online-card h1{margin:0;color:#f5d99d}.online-card p{margin:0 0 6px}
+.online-card input{background:#0f1b16;border:1px solid #66816b;border-radius:6px;color:white;padding:12px;font-size:16px}
+.online-buttons{display:flex;gap:10px}.online-buttons button{flex:1;padding:12px;background:#42684c;color:#fff5d8;border:1px solid #91ae83;border-radius:7px;cursor:pointer}
+#online-error{color:#ff8e91}.online-indicator{position:absolute;top:12px;right:12px;z-index:30;display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:7px;background:#16261eea;color:#e3f4dd;font:12px sans-serif}
+.online-indicator button{background:#405c48;border:1px solid #74937b;color:white;border-radius:4px;padding:4px 9px;cursor:pointer}
+
+/* Etapa 43: classificação multiplayer */
+.ranking-panel{position:absolute;z-index:30;top:80px;right:15px;width:min(520px,calc(100% - 30px));max-height:65%;background:#182920;color:#f1f5ec;border:1px solid #91aa7c;border-radius:10px;box-shadow:0 12px 32px #0009;overflow:hidden}.ranking-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#294334}.ranking-head button{background:#435d4a;color:white;border:0;border-radius:5px;padding:5px 10px;cursor:pointer}.ranking-scroll{overflow:auto;max-height:360px}.ranking-panel table{width:100%;border-collapse:collapse;font-size:12px}.ranking-panel th,.ranking-panel td{padding:9px 7px;text-align:left;border-bottom:1px solid #405747}.ranking-panel th{color:#f3d58b}.online-indicator{display:flex;gap:8px;align-items:center}
