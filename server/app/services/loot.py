@@ -38,3 +38,14 @@ def drop(character_id, zone, level):
         cursor = db.execute('INSERT INTO loot_items(character_id,item_json) VALUES (?,?)',(character_id,json.dumps(item,ensure_ascii=False)))
         item['id'] = cursor.lastrowid
     return item, 'ok'
+
+
+def discard_item(character_id, item_id):
+    with connection() as db:
+        cursor = db.execute('DELETE FROM loot_items WHERE character_id=? AND id=?', (character_id, item_id))
+        return cursor.rowcount == 1
+
+def discard_all(character_id):
+    with connection() as db:
+        cursor = db.execute('DELETE FROM loot_items WHERE character_id=?', (character_id,))
+        return cursor.rowcount

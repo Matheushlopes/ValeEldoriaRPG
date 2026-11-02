@@ -55,3 +55,26 @@ def ranking(limit: int = 50, user=Depends(current_user)):
 def logout(authorization: Annotated[str | None, Header()] = None):
     accounts.logout((authorization or '').removeprefix('Bearer ').strip())
     return {'ok': True}
+
+
+@router.get('/inventory')
+def get_inventory(user=Depends(current_user)):
+    from app.services import loot
+    character = characters.get_character(user['id'])
+    if not character: raise HTTPException(404, 'Personagem não encontrado.')
+    return {'items': loot.list_items(character['id'])}
+
+@router.delete('/inventory/{item_id}')
+def delete_inventory_item(item_id: int, user=Depends(current_user)):
+    from app.services import loot
+    character = characters.get_character(user['id'])
+    if not character: raise HTTPException(404, 'Personagem não encontrado.')
+    if not loot.discard_item(character['id'], item_id): raise HTTPException(404, 'Item não encontrado.')
+    return {'ok': True}
+
+@router.delete('/inventory')
+def delete_inventory(user=Depends(current_user)):
+    from app.services import loot
+    character = characters.get_character(user['id'])
+    if not character: raise HTTPException(404, 'Personagem não encontrado.')
+    return {'removed': loot.discard_all(character['id'])}

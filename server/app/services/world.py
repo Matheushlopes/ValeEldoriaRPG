@@ -29,7 +29,7 @@ class World:
             self.players[character['id']] = player
             self.sockets[character['id']] = socket
         await socket.send_json({'type': 'welcome', 'self': player['id'], 'players': self.snapshot(), 'monsters': self.monsters.nearby(player['x'],player['y']), 'inventory': loot.list_items(character['id'])})
-        await self.broadcast()
+        await self.broadcast(include_monsters=False)
 
     def snapshot(self):
         return [{k: p[k] for k in ('id','name','class_id','level','x','y','face')}
@@ -78,7 +78,8 @@ class World:
                 await self.send_event({'type':'player_attack','by':character_id,'class_id':player['class_id'], 'x':player['x'],'y':player['y'],'target_x':result['x'],'target_y':result['y']})
                 await self.send_event(result)
                 if result.get('kill'):
-                    item, loot_status = loot.drop(character_id, self.monsters.mobs[result['mob_id']].zone, self.monsters.mobs[result['mob_id']].level)
+                    mob = self.monsters.mobs[result['mob_id']]
+                    item, loot_status = loot.drop(character_id, mob.zone, mob.level)
                     socket=self.sockets.get(character_id)
                     if socket:
                         await socket.send_json({'type':'reward','xp':player['xp'], 'gold':player['gold'],
@@ -101,12 +102,12 @@ class World:
             save_position(character_id,p['x'],p['y'])
         await self.broadcast()
 
-    async def broadcast(self):
+    async def broadcast(self, include_monsters=False):
         payload = {'type': 'players', 'players': self.snapshot()}
         stale = []
         for char_id, socket in list(self.sockets.items()):
             try:
-                await socket.send_json({**payload, 'monsters':self.monsters.nearby(self.players[char_id]['x'],self.players[char_id]['y'])})
+                await socket.send_json({**payload, **({'monsters':self.monsters.nearby(self.players[char_id]['x'],self.players[char_id]['y'])} if include_monsters else {})})
             except Exception:
                 stale.append((char_id,socket))
         for char_id, socket in stale:
@@ -115,10 +116,13 @@ class World:
                 self.players.pop(char_id,None)
 
     async def run(self):
+        elapsed = 0.0
         while True:
             await asyncio.sleep(.1)
             self.monsters.tick(.1)
-            if self.sockets:
-                await self.broadcast()
+            elapsed += .1
+            if self.sockets and elapsed >= .5:
+                await self.broadcast(include_monsters=True)
+                elapsed = 0.0
 
 world = World()

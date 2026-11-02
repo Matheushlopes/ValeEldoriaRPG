@@ -131,7 +131,8 @@ function confirmDiscard(title,description,onConfirm){
 function discardSelected(){
  if(!selectedItem||selectedOrigin!=='bag')return;
  const item=selectedItem;
- confirmDiscard('Descartar item?',`Excluir ${item.name} permanentemente?`,()=>{
+ confirmDiscard('Descartar item?',`Excluir ${item.name} permanentemente?`,async()=>{
+  if(typeof Online!=='undefined'&&Online.shared()){try{await Online.removeItem(item.id);}catch(e){show('Erro ao salvar descarte: '+e.message);return;}}
   const index=inventory.findIndex(i=>i.id===item.id);
   if(index>=0)inventory.splice(index,1);
   selectedItem=null;selectedOrigin=null;renderInventory();
@@ -140,7 +141,8 @@ function discardSelected(){
 function discardAll(){
  if(!inventory.length){show('Sua bolsa já está vazia.');return;}
  const count=inventory.length;
- confirmDiscard('Limpar toda a bolsa?',`Excluir permanentemente ${count} item(ns) da bolsa? Itens equipados e pedras de evolução serão preservados.`,()=>{
+ confirmDiscard('Limpar toda a bolsa?',`Excluir permanentemente ${count} item(ns) da bolsa? Itens equipados e pedras de evolução serão preservados.`,async()=>{
+  if(typeof Online!=='undefined'&&Online.shared()){try{await Online.clearItems();}catch(e){show('Erro ao salvar descarte: '+e.message);return;}}
   inventory.splice(0,inventory.length);
   selectedItem=null;selectedOrigin=null;renderInventory();
   if(typeof renderSmith==='function'&&typeof smithOpen!=='undefined'&&smithOpen)renderSmith();
