@@ -17,7 +17,7 @@ const XP_RATE=GAME_RULES.progression.xpRate;
 function xpNeeded(){return Math.round(GAME_RULES.progression.xpBase*Math.pow(hero.level,GAME_RULES.progression.xpExponent));}
 function updateHud(){ $('level').textContent='Nv '+hero.level;const cl=document.getElementById('hud-class');if(cl)cl.textContent=hero.className||'Guerreiro';const em=document.getElementById('class-emblem');if(em)em.textContent=({warrior:'⚔',archer:'🏹',mage:'✦'})[hero.classId]||'⚔';$('hp-text').textContent=`${Math.floor(hero.hp)} / ${hero.maxHp} HP`;$('hp-bar').style.width=`${100*hero.hp/hero.maxHp}%`;$('xp-text').textContent=`XP ${hero.xp} / ${xpNeeded()}`;$('xp-bar').style.width=`${100*hero.xp/xpNeeded()}%`;$('mp-text').textContent=`${Math.floor(hero.mp)} / ${hero.maxMp} MP`;$('mp-bar').style.width=`${100*hero.mp/hero.maxMp}%`;$('gold').textContent=hero.gold;$('potions').textContent=hero.potions;}
 function toggleCharacter(force){characterOpen=typeof force==='boolean'?force:!characterOpen;$('character').classList.toggle('hidden',!characterOpen);renderCharacter();}
-function spendPoint(stat){if(characterOpen&&hero.points>0&&['str','int','dex','con'].includes(stat)){hero[stat]++;hero.points--;recalcHero();renderCharacter();updateHud();renderInventory();}}
+function spendPoint(stat){if(characterOpen&&hero.points>0&&['str','int','dex','con'].includes(stat)){if(typeof Online!=='undefined')return Online.spendPoint(stat);}}
 function characterStatRows(rows){return rows.map(([label,value])=>`<div class="wyd-stat-row"><span>${label}</span><strong>${value}</strong></div>`).join('');}
 function renderCharacter(){
  if(!$('stat-points'))return;

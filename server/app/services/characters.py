@@ -39,3 +39,17 @@ def create_character(user_id: int, name: str, class_id: str):
 def save_position(character_id: int, x: float, y: float):
     with connection() as db:
         db.execute('UPDATE characters SET x=?,y=? WHERE id=?', (x,y,character_id))
+
+
+def spend_attribute_point(user_id: int, stat: str):
+    if stat not in ('str', 'int', 'dex', 'con'):
+        raise HTTPException(400, 'Atributo inválido.')
+    # Atualização atômica: saldo e atributo são alterados juntos.
+    with connection() as db:
+        result = db.execute(
+            f'UPDATE characters SET "{stat}"="{stat}"+1, points=points-1 WHERE user_id=? AND points>0',
+            (user_id,))
+        if result.rowcount != 1:
+            raise HTTPException(409, 'Sem pontos disponíveis.')
+        row = db.execute('SELECT id,str,int,dex,con,points FROM characters WHERE user_id=?', (user_id,)).fetchone()
+    return dict(row)

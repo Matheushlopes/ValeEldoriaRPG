@@ -5,6 +5,7 @@ from fastapi import WebSocket
 from app.core.settings import MAX_PLAYERS, WORLD_HEIGHT, WORLD_WIDTH
 from app.services.characters import save_position
 from app.services.monsters import MonsterService
+from app.services import loot
 
 MAX_SPEED = 190.0  # pixels/segundo, margem para bônus de movimento
 
@@ -27,7 +28,7 @@ class World:
             player.update(face='down', last_move=time.monotonic(), last_save=time.monotonic())
             self.players[character['id']] = player
             self.sockets[character['id']] = socket
-        await socket.send_json({'type': 'welcome', 'self': player['id'], 'players': self.snapshot(), 'monsters': self.monsters.nearby(player['x'],player['y'])})
+        await socket.send_json({'type': 'welcome', 'self': player['id'], 'players': self.snapshot(), 'monsters': self.monsters.nearby(player['x'],player['y']), 'inventory': loot.list_items(character['id'])})
         await self.broadcast()
 
     def snapshot(self):
@@ -60,6 +61,13 @@ class World:
             save_position(character_id,p['x'],p['y'])
             p['last_save'] = now
 
+    async def sync_attributes(self, character_id: int, attributes: dict):
+        async with self.lock:
+            player = self.players.get(character_id)
+            if player:
+                for key in ('str', 'int', 'dex', 'con', 'points'):
+                    player[key] = attributes[key]
+
     async def attack(self, character_id: int, message: dict):
         async with self.lock:
             player=self.players.get(character_id)
@@ -70,11 +78,12 @@ class World:
                 await self.send_event({'type':'player_attack','by':character_id,'class_id':player['class_id'], 'x':player['x'],'y':player['y'],'target_x':result['x'],'target_y':result['y']})
                 await self.send_event(result)
                 if result.get('kill'):
+                    item, loot_status = loot.drop(character_id, self.monsters.mobs[result['mob_id']].zone, self.monsters.mobs[result['mob_id']].level)
                     socket=self.sockets.get(character_id)
                     if socket:
                         await socket.send_json({'type':'reward','xp':player['xp'], 'gold':player['gold'],
                                                 'level':player['level'],'points':player['points'],
-                                                'gained_xp':result['xp'],'gained_gold':result['gold']})
+                                                'gained_xp':result['xp'],'gained_gold':result['gold'], 'item':item, 'loot_status':loot_status})
 
     async def send_event(self, payload):
         for socket in list(self.sockets.values()):

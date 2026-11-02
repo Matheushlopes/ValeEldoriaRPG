@@ -2,12 +2,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 from app.services import accounts, characters
+from app.services.world import world
 
 router = APIRouter(prefix='/api')
 
 class Credentials(BaseModel):
     username: str
     password: str
+
+class SpendPoint(BaseModel):
+    stat: str
 
 class NewCharacter(BaseModel):
     name: str
@@ -33,6 +37,12 @@ def me(user=Depends(current_user)):
 @router.post('/characters', status_code=201)
 def create(data: NewCharacter, user=Depends(current_user)):
     return characters.create_character(user['id'], data.name, data.class_id)
+
+@router.post('/characters/points')
+async def spend_point(data: SpendPoint, user=Depends(current_user)):
+    result = characters.spend_attribute_point(user['id'], data.stat)
+    await world.sync_attributes(result['id'], result)
+    return result
 
 @router.get('/ranking')
 def ranking(limit: int = 50, user=Depends(current_user)):

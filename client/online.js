@@ -107,7 +107,14 @@ const Online = (() => {
     socket.addEventListener('open', () => socket.send(JSON.stringify({type:'auth',token})));
     socket.addEventListener('message', event => {
       const message = JSON.parse(event.data);
-      if (message.type === 'welcome') selfId = message.self;
+      if (message.type === 'welcome') {
+        selfId = message.self;
+        if (Array.isArray(message.inventory)) {
+          inventory.splice(0,inventory.length,...message.inventory);
+          nextItemId = Math.max(nextItemId, ...inventory.map(item => item.id + 1), 1);
+          renderInventory();
+        }
+      }
       if (message.monsters) syncMonsters(message.monsters);
       if (message.type === 'mob_hit') {
         const mob=monsters.find(m=>m.id===message.mob_id);
@@ -124,6 +131,14 @@ const Online = (() => {
       if (message.type === 'reward') {
         hero.xp=message.xp;hero.gold=message.gold;hero.level=message.level;hero.points=message.points;
         floatText(player.x,player.y-34,`+${message.gained_xp} XP · +${message.gained_gold} ouro`,'#f7d777');
+        if (message.item) {
+          inventory.push(message.item);
+          nextItemId=Math.max(nextItemId,message.item.id+1);
+          show('🎁 Drop: '+message.item.name+'!');
+          renderInventory();
+        } else if (message.loot_status === 'full') {
+          show('🎒 Bolsa cheia! Drop não recebido.');
+        }
         recalcHero();updateHud();renderCharacter();
       }
       if (message.type === 'players' || message.type === 'welcome') {
@@ -204,6 +219,27 @@ const Online = (() => {
     try{const data=await request('/ranking');body.replaceChildren();for(const p of data.players){const row=document.createElement('tr');for(const value of [p.position,p.name,({warrior:'Guerreiro',archer:'Arqueiro',mage:'Mago'})[p.class_id]||p.class_id,p.level,p.xp]){const td=document.createElement('td');td.textContent=value;row.append(td);}body.append(row);}}
     catch(e){body.textContent=e.message;}
   }
+  let spendingPoint = false;
+  async function spendPoint(stat) {
+    if (spendingPoint || !adventureStarted || hero.points <= 0) return;
+    spendingPoint = true;
+    try {
+      const updated = await request('/characters/points', {
+        method:'POST', body:JSON.stringify({stat})
+      });
+      for (const key of ['str','int','dex','con','points']) hero[key] = updated[key];
+      recalcHero(); renderCharacter(); updateHud(); renderInventory();
+    } catch (error) {
+      show('Não foi possível distribuir ponto: ' + error.message);
+      try {
+        const me = await request('/me');
+        if (me.character) {
+          for (const key of ['str','int','dex','con','points']) hero[key] = me.character[key];
+          recalcHero(); renderCharacter(); updateHud(); renderInventory();
+        }
+      } catch (_) {}
+    } finally { spendingPoint = false; }
+  }
   function logout() {
     shouldReconnect=false;
     if (reconnectTimer) clearTimeout(reconnectTimer);
@@ -220,5 +256,5 @@ const Online = (() => {
     $online('ranking-close').addEventListener('click',()=>{rankingOpen=false;$online('ranking-panel').classList.add('hidden');});
     initialize();
   });
-  return {createCharacter,tick,draw,attack,shared};
+  return {createCharacter,tick,draw,attack,shared,spendPoint};
 })();

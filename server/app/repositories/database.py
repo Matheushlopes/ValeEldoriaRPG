@@ -39,4 +39,10 @@ def initialize():
           dex INTEGER NOT NULL, con INTEGER NOT NULL, points INTEGER NOT NULL DEFAULT 0,
           hp REAL NOT NULL DEFAULT 100, mp REAL NOT NULL DEFAULT 40
         );
+        CREATE TABLE IF NOT EXISTS loot_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          character_id INTEGER NOT NULL REFERENCES characters(id),
+          item_json TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_loot_owner ON loot_items(character_id);
         """)
