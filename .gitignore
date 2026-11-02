@@ -1,0 +1,67 @@
+# ==========================================
+# VALE DE ELDORIA ONLINE
+# ==========================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Variaveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Bancos de dados locais
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Logs
+*.log
+logs/
+*.pid
+
+# Arquivos temporarios
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.cache/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+.Trash-*/
+
+# Editores
+.vscode/
+.idea/
+*.code-workspace
+
+# Node.js (caso seja usado futuramente)
+node_modules/
+npm-debug.log*
+dist/
+coverage/
+
+# Configuracoes locais
+.local/
