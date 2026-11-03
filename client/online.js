@@ -155,6 +155,8 @@ const Online = (() => {
           renderInventory();
         } else if (message.loot_status === 'full') {
           show('🎒 Bolsa cheia! Drop não recebido.');
+        } else if (message.loot_status === 'no_drop') {
+          // Chance normal de não receber equipamento; XP e ouro continuam garantidos.
         } else if (message.loot_status === 'no_template') {
           show('⚠️ Drop indisponível nesta região.');
         }

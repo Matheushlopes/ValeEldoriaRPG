@@ -5,6 +5,12 @@ from pathlib import Path
 from app.repositories.database import connection
 
 CATALOG = json.loads(Path(__file__).with_name('loot_catalog.json').read_text(encoding='utf-8'))
+# Catálogo validado por zona. Cada uma das oito regiões deve possuir itens.
+CATALOG_BY_ZONE = {zone: [item for item in CATALOG if int(item.get('regionIndex', -1)) == zone]
+                   for zone in range(8)}
+if any(not items for items in CATALOG_BY_ZONE.values()):
+    raise RuntimeError('Catálogo de drops incompleto: há zonas sem equipamentos.')
+
 RARITIES = [('common', 59), ('uncommon', 23), ('rare', 11), ('veryrare', 5), ('epic', 1.7), ('legendary', .3)]
 MULT = {'common': 1, 'uncommon': 1.15, 'rare': 1.3, 'veryrare': 1.5, 'epic': 1.75, 'legendary': 2}
 AFFIXES = {'gold':75,'xp':65,'drop':45,'crit':35,'critDamage':90,'lifesteal':18,'haste':45,'hp':60,'mana':55,'resist':35,'spell':65,'move':25,'hpRegen':150,'mpRegen':150,'cooldown':35,'aoe':60}
@@ -19,7 +25,7 @@ def drop(character_id, zone, level):
     # Chance base de 45% por monstro; apenas o jogador do golpe final recebe.
     if random.random() >= .45:
         return None, 'no_drop'
-    candidates = [t for t in CATALOG if t['regionIndex'] == zone]
+    candidates = CATALOG_BY_ZONE.get(int(zone), [])
     if not candidates:
         return None, 'no_template'
     template = random.choice(candidates)

@@ -96,6 +96,35 @@ function makeTerrainChunk(cx,cy){
  }
  return surface;
 }
+// Sinalização pintada no chão: da praça central até a primeira zona (Nv 1–9).
+// Desenhada sobre o terreno, sem colisão ou sprites extras.
+function drawNoviceRoadGuide(camX,camY){
+ const y=ROAD_Y*TILE+TILE/2;
+ const marks=[36,32,28,24,20,16,12,8,5];
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+ for(const tx of marks){
+  const x=tx*TILE+TILE/2;
+  if(x<camX-70||x>camX+canvas.width+70||y<camY-70||y>camY+canvas.height+70)continue;
+  ctx.fillStyle='#443823';ctx.fillRect(x-11,y-8,22,16);
+  ctx.fillStyle='#f9dc92';ctx.font='bold 17px monospace';ctx.fillText('←',x,y);
+ }
+ // A saída norte da estrada leva ao mapa inicial.
+ const x=5*TILE+TILE/2;
+ for(const ty of [26,25]){
+  const yy=ty*TILE+TILE/2;
+  if(x>=camX-50&&x<=camX+canvas.width+50&&yy>=camY-50&&yy<=camY+canvas.height+50){
+   ctx.fillStyle='#443823';ctx.fillRect(x-11,yy-8,22,16);
+   ctx.fillStyle='#f9dc92';ctx.font='bold 16px monospace';ctx.fillText('↑',x,yy);
+  }
+ }
+ const labelX=10*TILE,labelY=ROAD_Y*TILE+TILE/2;
+ if(labelX>=camX-140&&labelX<=camX+canvas.width+140&&labelY>=camY-50&&labelY<=camY+canvas.height+50){
+  ctx.font='bold 12px monospace';
+  ctx.fillStyle='#40311c';ctx.fillRect(labelX-101,labelY-28,202,19);
+  ctx.fillStyle='#ffe6a7';ctx.fillText('INICIANTES  ←  Nv 1–9',labelX,labelY-18);
+ }
+ ctx.restore();
+}
 function drawTerrain(camX,camY){
  const xStart=Math.max(0,Math.floor(camX/CHUNK_PX)),yStart=Math.max(0,Math.floor(camY/CHUNK_PX));
  const xEnd=Math.min(Math.ceil(COLS/CHUNK_TILES),Math.ceil((camX+canvas.width)/CHUNK_PX)+1);
@@ -127,6 +156,7 @@ let previousRegion='';function updateRegion(){const region=regionAt(player.x,pla
 let last=performance.now();let lastPaint=0;function frame(now){if(!adventureStarted){last=now;requestAnimationFrame(frame);return;}if(document.hidden){last=now;requestAnimationFrame(frame);return;}if(now-lastPaint<1000/75){requestAnimationFrame(frame);return;}lastPaint=now;for(const m of (Online.shared()?[]:monsters))if(m.defeated&&now>=m.respawnAt){m.defeated=false;m.hp=mobMaxHp(m);m.aggro=false;m.wanderUntil=0;m.x=m.spawnX;m.y=m.spawnY;}const dt=Math.min((now-last)/1000,.05);last=now;let dx=0,dy=0;if(keys.has('a')||keys.has('arrowleft'))dx--;if(keys.has('d')||keys.has('arrowright'))dx++;if(keys.has('w')||keys.has('arrowup'))dy--;if(keys.has('s')||keys.has('arrowdown'))dy++;player.moving=!!(dx||dy);if(player.moving)player.walkPhase+=dt*13;if(dx||dy){let len=Math.hypot(dx,dy);move(dx/len*player.speed*(1+totalBonus('move')/100)*dt,dy/len*player.speed*(1+totalBonus('move')/100)*dt);player.face=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');}
  Online.tick(now);updateRegion();if(Online.shared()){updateProjectiles(now,dt);}else updateCombat(now,dt);tickAutoAttack(now);tickAutoSkills(now);const camX=Math.max(0,Math.min(W-canvas.width,player.x-canvas.width/2)),camY=Math.max(0,Math.min(H-canvas.height,player.y-canvas.height/2));ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-Math.floor(camX),-Math.floor(camY));
  drawTerrain(camX,camY);
+ drawNoviceRoadGuide(camX,camY);
  // Caverna esculpida na borda oeste, ao lado da estrada central.
  mapSprite('cave',TILE*1,TILE*(ROAD_Y-3),TILE*5,TILE*5);
  ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillStyle='#f7dba7';ctx.fillText('Caverna de Lúmen',TILE*3.5,TILE*(ROAD_Y-3)-6);ctx.textAlign='start';
