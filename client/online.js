@@ -118,7 +118,7 @@ const Online = (() => {
       if (message.monsters) syncMonsters(message.monsters);
       if (message.type === 'mob_hit') {
         const mob=monsters.find(m=>m.id===message.mob_id);
-        if(mob){mob.hp=message.hp;mob.defeated=message.hp<=0;floatText(message.x,message.y-25,`-${message.hit}`,'#ffe0a0');}
+        if(mob){mob.hp=message.hp;mob.defeated=message.hp<=0;floatText(mob.x,mob.y-25,`-${message.hit}`,'#ffe0a0');addEffect('slash',mob.x,mob.y,24,'#ffe2a2',190);}
         if(message.kill && message.killer===selfId) show('⚔️ KS! Você finalizou o monstro.');
       }
       if (message.type === 'player_attack' && message.by !== selfId) {
@@ -130,7 +130,7 @@ const Online = (() => {
       }
       if (message.type === 'player_hit' && message.player_id === selfId) {
         hero.hp = message.hp;
-        floatText(player.x,player.y-28,`-${message.hit}`,'#ff8585');
+        floatText(player.x,player.y-28,`-${message.hit}`,'#ff8585');addEffect('ring',player.x,player.y,27,'#ff6c6c',230);
         updateHud();
       }
       if (message.type === 'player_respawn' && message.player_id === selfId) {
@@ -199,6 +199,8 @@ const Online = (() => {
   }
   function attack(mob,magic=false) {
     if(!serverMonsters || !socket || socket.readyState!==WebSocket.OPEN)return;
+    // Feedback imediato; dano e recompensa continuam sendo confirmados pelo servidor.
+    addEffect(magic?'beam':'slash',mob.x,mob.y,magic?24:29,magic?'#a7b9ff':'#ffdfa0',175);
     socket.send(JSON.stringify({type:'attack',mob_id:mob.id,magic}));
   }
   function shared(){return serverMonsters;}

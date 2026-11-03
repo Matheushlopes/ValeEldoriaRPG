@@ -11,7 +11,7 @@ RANGES = [(1, 9), (10, 19), (20, 29), (30, 44), (45, 59), (60, 79), (80, 99), (1
 TYPES = [('slime','rat'), ('rat','wolf'), ('wolf','goblin'), ('goblin','orc'), ('skeleton','orc'), ('orc','king'), ('skeleton','king','orc'), ('king','orc','skeleton')]
 CLASS = {
     'warrior': {'str': 1.65, 'dex': 0, 'mult': 1.08, 'delay': .9, 'speed': .6, 'dex_speed': .0045, 'range': 75},
-    'archer': {'str': .8, 'dex': .55, 'mult': .7, 'delay': .75, 'speed': .88, 'dex_speed': .007, 'range': 265},
+    'archer': {'str': .85, 'dex': 1.15, 'mult': 1.12, 'delay': .75, 'speed': .88, 'dex_speed': .007, 'range': 265},
     'mage': {'str': .3, 'dex': 0, 'mult': .68, 'delay': .95, 'speed': .49, 'dex_speed': .0015, 'range': 190},
 }
 

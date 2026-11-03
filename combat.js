@@ -78,7 +78,11 @@ function drawProjectiles(){
   }ctx.restore();}
 }
 let regenAccumulator=0;const effects=[];function addEffect(kind,x,y,radius,color,duration=550){effects.push({kind,x,y,radius,color,start:performance.now(),duration});}function hpRegenRate(){return .35+hero.con*.035+totalBonus('hpRegen')*.045;}function mpRegenRate(){return .28+hero.int*.025+totalBonus('mpRegen')*.045;}function updateRegen(dt){if(hero.hp<=0)return;regenAccumulator+=dt;if(regenAccumulator<.2)return;const tick=regenAccumulator;regenAccumulator=0;hero.hp=Math.min(hero.maxHp,Math.round((hero.hp+hpRegenRate()*tick)*100)/100);hero.mp=Math.min(hero.maxMp,Math.round((hero.mp+mpRegenRate()*tick)*100)/100);updateHud();}
-function floatText(x,y,text,color='#fff'){combatText.push({x,y,text,color,until:performance.now()+850});}
+function floatText(x,y,text,color='#fff'){
+ const now=performance.now(), reward=/XP|ouro|Drop|Pedra/.test(String(text));
+ combatText.push({x,y,text:String(text),color,start:now,duration:reward?760:560,drift:(Math.random()-.5)*16,reward});
+ if(combatText.length>55)combatText.splice(0,combatText.length-55);
+}
 function mobMaxHp(m){return Math.round((GAME_RULES.monsters.hpBase+GAME_RULES.monsters.hpPerLevel*m.level+GAME_RULES.monsters.hpPower*Math.pow(m.level,GAME_RULES.monsters.hpExponent))*(1+Math.max(0,m.zone)*GAME_RULES.monsters.hpZoneScale));}
 function mobStats(m){const mult=1+Math.max(0,m.zone)*GAME_RULES.monsters.attackZoneScale;return {attack:Math.round((GAME_RULES.monsters.attackBase+m.level*GAME_RULES.monsters.attackPerLevel+Math.pow(m.level,GAME_RULES.monsters.attackExponent)*GAME_RULES.monsters.attackPower)*mult),defense:Math.floor((GAME_RULES.monsters.defenseBase+m.level*GAME_RULES.monsters.defensePerLevel+Math.pow(m.level,GAME_RULES.monsters.defenseExponent)*GAME_RULES.monsters.defensePower)*(1+Math.max(0,m.zone)*GAME_RULES.monsters.defenseZoneScale))};}
 function damage(attack,defense){return Math.max(1,attack-defense+randomInt(-2,3));}
@@ -145,9 +149,16 @@ function updateCombat(now,dt){
    if(zoneIndex(player.x,player.y)<0)break;
   }
  }
- combatText=combatText.filter(f=>f.until>now);
+ combatText=combatText.filter(f=>now-f.start<f.duration);
 }
-function drawCombatEffects(now){drawProjectiles();for(let i=effects.length-1;i>=0;i--){const e=effects[i],p=(now-e.start)/e.duration;if(p>=1){effects.splice(i,1);continue;}ctx.save();ctx.globalAlpha=(1-p)*.85;ctx.strokeStyle=e.color;ctx.lineWidth=4+3*(1-p);ctx.beginPath();if(e.kind==='slash'){ctx.lineWidth=7*(1-p)+2;ctx.arc(e.x,e.y,e.radius,Math.PI*(.95+p*.3),Math.PI*(1.95+p*.3));}else ctx.arc(e.x,e.y,e.radius*(e.kind==='ring'?.35+p*.75:.2+p*.8),0,Math.PI*2);ctx.stroke();if(e.kind==='beam'){ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,12*(1-p)+4,0,Math.PI*2);ctx.fill();}ctx.restore();}for(const m of monsters){if(m.defeated||Math.abs(m.x-player.x)>canvas.width/2+140||Math.abs(m.y-player.y)>canvas.height/2+140)continue;const hp=m.hp/mobMaxHp(m);ctx.fillStyle='#261f20';ctx.fillRect(m.x-17,m.y-36,34,5);ctx.fillStyle='#e77769';ctx.fillRect(m.x-17,m.y-36,34*Math.max(0,hp),5);}ctx.font='bold 12px monospace';ctx.textAlign='center';for(const f of combatText){ctx.fillStyle=f.color;ctx.fillText(f.text,f.x,f.y-(1-(f.until-now)/850)*18);}ctx.textAlign='start';}
+function drawCombatEffects(now){drawProjectiles();for(let i=effects.length-1;i>=0;i--){const e=effects[i],p=(now-e.start)/e.duration;if(p>=1){effects.splice(i,1);continue;}ctx.save();ctx.globalAlpha=(1-p)*.85;ctx.strokeStyle=e.color;ctx.lineWidth=4+3*(1-p);ctx.beginPath();if(e.kind==='slash'){ctx.lineWidth=7*(1-p)+2;ctx.arc(e.x,e.y,e.radius,Math.PI*(.95+p*.3),Math.PI*(1.95+p*.3));}else ctx.arc(e.x,e.y,e.radius*(e.kind==='ring'?.35+p*.75:.2+p*.8),0,Math.PI*2);ctx.stroke();if(e.kind==='beam'){ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,12*(1-p)+4,0,Math.PI*2);ctx.fill();}ctx.restore();}for(const m of monsters){if(m.defeated||Math.abs(m.x-player.x)>canvas.width/2+140||Math.abs(m.y-player.y)>canvas.height/2+140)continue;const hp=m.hp/mobMaxHp(m);ctx.fillStyle='#261f20';ctx.fillRect(m.x-17,m.y-36,34,5);ctx.fillStyle='#e77769';ctx.fillRect(m.x-17,m.y-36,34*Math.max(0,hp),5);}ctx.textAlign='center';for(const f of combatText){
+ const t=Math.min(1,Math.max(0,(now-f.start)/f.duration));
+ const alpha=Math.min(1,(1-t)*3);
+ ctx.save();ctx.globalAlpha=alpha;ctx.font=f.reward?'bold 12px sans-serif':'900 17px sans-serif';
+ ctx.lineJoin='round';ctx.lineWidth=3.5;ctx.strokeStyle='rgba(20,18,25,.88)';
+ const x=f.x+f.drift*t,y=f.y-20*t-9*Math.sin(t*Math.PI);
+ ctx.strokeText(f.text,x,y);ctx.fillStyle=f.color;ctx.fillText(f.text,x,y);ctx.restore();
+}ctx.textAlign='start';}
 updateHud();renderInventory();renderCharacter();
 
 // Loja de habilidades: desbloqueio por nível e compra com ouro.
