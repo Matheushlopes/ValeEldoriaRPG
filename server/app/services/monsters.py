@@ -163,8 +163,14 @@ class MonsterService:
         else:
             power=(5+player['str']*cfg['str']+player['dex']*cfg['dex'])*cfg['mult']
         hit=max(1,round(power-defense+self.rng.randint(-2,3)))
-        m.hp=max(0,m.hp-hit)
-        result={'type':'mob_hit','mob_id':m.id,'hp':m.hp,'hit':hit,'by':pid,'x':m.x,'y':m.y}
+        # Double hit do Guerreiro: dois golpes na mesma ação validada pelo servidor.
+        # Segundo golpe causa 60% do primeiro; cooldown, alcance e recompensa permanecem únicos.
+        second_hit=max(1,round(hit*.60)) if player['class_id']=='warrior' and not magic else 0
+        total_hit=min(m.hp, hit+second_hit)
+        m.hp=max(0,m.hp-total_hit)
+        result={'type':'mob_hit','mob_id':m.id,'hp':m.hp,'hit':total_hit,
+                'hits':[hit,second_hit] if second_hit else [hit],
+                'by':pid,'x':m.x,'y':m.y}
         if m.hp==0:
             m.respawn_at=now+10
             xp=round((20+16*m.level**1.5)*.84*ZONE_REWARD_MULTIPLIERS[m.zone])

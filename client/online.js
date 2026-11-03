@@ -118,7 +118,13 @@ const Online = (() => {
       if (message.monsters) syncMonsters(message.monsters);
       if (message.type === 'mob_hit') {
         const mob=monsters.find(m=>m.id===message.mob_id);
-        if(mob){mob.hp=message.hp;mob.defeated=message.hp<=0;floatText(mob.x,mob.y-25,`-${message.hit}`,'#ffe0a0');addEffect('slash',mob.x,mob.y,24,'#ffe2a2',190);}
+        if(mob){
+          mob.hp=message.hp;mob.defeated=message.hp<=0;
+          const hits=Array.isArray(message.hits)?message.hits:[message.hit];
+          hits.forEach((amount,i)=>floatText(mob.x+(i?19:-9),mob.y-25-(i?15:0),`-${amount}`,i?'#ffab70':'#ffe0a0'));
+          addEffect('slash',mob.x,mob.y,24,'#ffe2a2',190);
+          if(hits.length>1)addEffect('slash',mob.x+12,mob.y-8,19,'#ff9e6c',230);
+        }
         if(message.kill && message.killer===selfId) show('⚔️ KS! Você finalizou o monstro.');
       }
       if (message.type === 'player_attack' && message.by !== selfId) {
