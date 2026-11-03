@@ -84,7 +84,7 @@ function attachTooltip(button,item){const tip=document.getElementById('item-tool
 }
 function totalBonus(kind){return Math.min(AFFIXES[kind].cap,Object.values(equipment).reduce((sum,item)=>sum+(item?.affixes?.[kind]||0),0));}
 const SLOTS={weapon:'Arma',helmet:'Capacete',armor:'Armadura',gloves:'Luvas',boots:'Botas',ring:'Anel',amulet:'Amuleto'};
-const inventory=[];let evolutionStones=0;const equipment=Object.fromEntries(Object.keys(SLOTS).map(k=>[k,null]));let selectedItem=null,selectedOrigin=null,inventoryOpen=false,nextItemId=1;
+const inventory=[];const equipment=Object.fromEntries(Object.keys(SLOTS).map(k=>[k,null]));let selectedItem=null,selectedOrigin=null,inventoryOpen=false,nextItemId=1;
 function rollLoot(level,lootRegion="forest"){
  // Chance de equipamento por vitória: 45%. A tabela de raridade soma 100% condicional ao drop.
  if(Math.random()>=Math.min(.9,.45*(1+totalBonus('drop')/100)))return null;
@@ -106,10 +106,10 @@ function chooseItem(item,origin){selectedItem=item;selectedOrigin=origin;renderI
 function renderInventory(){
  const count=document.getElementById('bag-count');if(!count)return;
  count.textContent=inventory.length+'/30';document.getElementById('inventory-capacity').textContent=inventory.length+' / 30';
- const grid=document.getElementById('inventory-grid');grid.replaceChildren();document.getElementById('stone-count').textContent=evolutionStones;document.getElementById('item-discard-all').disabled=inventory.length===0;
+ const grid=document.getElementById('inventory-grid');grid.replaceChildren();document.getElementById('item-discard-all').disabled=inventory.length===0;
  for(let i=0;i<30;i++){const item=inventory[i],button=document.createElement('button');button.type='button';button.className='item-slot'+(item?' rarity-'+item.rarity:'')+(item&&selectedItem?.id===item.id?' selected':'');button.title='';setItemIcon(button,item);if(item){attachTooltip(button,item);const lvl=document.createElement('span');lvl.className='slot-refine';lvl.textContent=item.refine?'+'+item.refine:'';button.append(lvl);}if(item)button.addEventListener('click',()=>chooseItem(item,'bag'));else button.disabled=true;grid.append(button);}
  const equip=document.getElementById('equipment-list');equip.replaceChildren();for(const [slot,label] of Object.entries(SLOTS)){const item=equipment[slot],button=document.createElement('button');button.type='button';button.dataset.slot=slot;button.setAttribute('aria-label',label+(item?' — '+item.name:' — vazio'));button.className='equip-row'+(item?' rarity-'+item.rarity:'')+(item&&selectedItem?.id===item.id?' selected':'');button.innerHTML='<span class="equip-slot-icon">'+(item?itemIcon(item):'·')+'</span><small>'+label+'</small>'+(item?.refine?'<b>+'+item.refine+'</b>':'');button.disabled=!item;if(item){attachTooltip(button,item);button.addEventListener('click',()=>chooseItem(item,'equipment'));}equip.append(button);}
- document.getElementById('stats-list').textContent=`⚔ Físico: ${getAttack(hero)} · ✨ Mágico: ${getMagic(hero)} · 🛡 Defesa: ${getDefense(hero)} · 🪙 +${totalBonus('gold')}% ouro · ⭐ +${totalBonus('xp')}% XP · 🎁 +${totalBonus('drop')}% drop · 💎 ${evolutionStones} pedras`;
+ document.getElementById('stats-list').textContent=`⚔ Físico: ${getAttack(hero)} · ✨ Mágico: ${getMagic(hero)} · 🛡 Defesa: ${getDefense(hero)} · 🪙 +${totalBonus('gold')}% ouro · ⭐ +${totalBonus('xp')}% XP · 🎁 +${totalBonus('drop')}% drop`;
  const details=document.getElementById('item-details'),equipButton=document.getElementById('item-equip'),discardButton=document.getElementById('item-discard');
  const valid=selectedItem&&(selectedOrigin==='bag'?inventory.some(i=>i.id===selectedItem.id):equipment[selectedItem.slot]?.id===selectedItem.id);
  if(!valid){selectedItem=null;selectedOrigin=null;if(details)details.textContent='Passe o mouse para ver os atributos; clique para equipar ou descartar.';equipButton.disabled=true;discardButton.disabled=true;return;}
@@ -141,7 +141,7 @@ function discardSelected(){
 function discardAll(){
  if(!inventory.length){show('Sua bolsa já está vazia.');return;}
  const count=inventory.length;
- confirmDiscard('Limpar toda a bolsa?',`Excluir permanentemente ${count} item(ns) da bolsa? Itens equipados e pedras de evolução serão preservados.`,async()=>{
+ confirmDiscard('Limpar toda a bolsa?',`Excluir permanentemente ${count} item(ns) da bolsa? Itens equipados serão preservados.`,async()=>{
   if(typeof Online!=='undefined'&&Online.shared()){try{await Online.clearItems();}catch(e){show('Erro ao salvar descarte: '+e.message);return;}}
   inventory.splice(0,inventory.length);
   selectedItem=null;selectedOrigin=null;renderInventory();
@@ -162,7 +162,7 @@ function sellAll(){
  if(!inventory.length){show('Sua bolsa está vazia.');return;}
  const count=inventory.length;
  const total=inventory.reduce((sum,item)=>sum+salePrice(item),0);
- confirmDiscard('Vender todos os itens?',`Vender ${count} item(ns) por 🪙 ${total.toLocaleString('pt-BR')} ouro? Equipados e pedras serão preservados.`,()=>{
+ confirmDiscard('Vender todos os itens?',`Vender ${count} item(ns) por 🪙 ${total.toLocaleString('pt-BR')} ouro? Equipados serão preservados.`,()=>{
   // Recalcular no momento da confirmação.
   const actual=inventory.reduce((sum,item)=>sum+salePrice(item),0);
   inventory.splice(0,inventory.length);hero.gold+=actual;

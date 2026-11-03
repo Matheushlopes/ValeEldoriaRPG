@@ -126,9 +126,13 @@ class MonsterService:
             if distance > 43 or now < self.mob_cooldowns.get(m.id, 0):
                 continue
             self.mob_cooldowns[m.id] = now + max(.85, 1.75-m.level*.013)
-            defense = 2 + target['con']*.65
+            is_warrior = target.get('class_id') == 'warrior'
+            # Guerreiro: maior aproveitamento de CON e 25% de redução
+            # no dano recebido após o cálculo de defesa.
+            defense = 2 + target['con']*(1.05 if is_warrior else .65)
             attack = 5 + m.level*2 + .45*m.level**1.25
-            hit = max(1, round(attack-defense+self.rng.randint(-2,3)))
+            raw_hit = max(1, round(attack-defense+self.rng.randint(-2,3)))
+            hit = max(1, round(raw_hit*.75)) if is_warrior else raw_hit
             target['hp'] = max(0, target['hp']-hit)
             events.append({'type':'player_hit','player_id':target['id'],
                            'hit':hit,'hp':round(target['hp'],2), 'mob_id':m.id})

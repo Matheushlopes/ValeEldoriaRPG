@@ -5,7 +5,7 @@ from pathlib import Path
 from app.repositories.database import connection
 
 CATALOG = json.loads(Path(__file__).with_name('loot_catalog.json').read_text(encoding='utf-8'))
-RARITIES = [('common', 65), ('uncommon', 22), ('rare', 9), ('veryrare', 3), ('epic', .9), ('legendary', .1)]
+RARITIES = [('common', 59), ('uncommon', 23), ('rare', 11), ('veryrare', 5), ('epic', 1.7), ('legendary', .3)]
 MULT = {'common': 1, 'uncommon': 1.15, 'rare': 1.3, 'veryrare': 1.5, 'epic': 1.75, 'legendary': 2}
 AFFIXES = {'gold':75,'xp':65,'drop':45,'crit':35,'critDamage':90,'lifesteal':18,'haste':45,'hp':60,'mana':55,'resist':35,'spell':65,'move':25,'hpRegen':150,'mpRegen':150,'cooldown':35,'aoe':60}
 AFFIX_RANGES = {'common':(0,1,2,4),'uncommon':(1,1,3,6),'rare':(1,2,5,10),'veryrare':(2,2,7,13),'epic':(2,3,10,17),'legendary':(3,3,17,27)}

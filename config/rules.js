@@ -29,11 +29,11 @@ const GAME_DEFAULTS={
 {id:'mag20',classId:'mage',name:'Meteoro de Pégasus',key:'2',icon:'☄️',cost:55,cooldown:14500,unlock:20,price:5200,kind:'magic',radius:300,color:'#ffbe76',factor:2.15,aoe:115,desc:'Meteoro mágico que explode sobre o alvo e seus vizinhos.'},
 {id:'mag30',classId:'mage',name:'Cataclismo Astral',key:'3',icon:'🌌',cost:90,cooldown:23000,unlock:30,price:14500,kind:'magic',radius:220,color:'#c8a4ff',factor:2.45,desc:'Explosão arcana que alcança todos os inimigos próximos.'}
 ],
- rarities:{common:{label:'Comum',weight:60,mult:1,improvement:0},uncommon:{label:'Incomum',weight:25,mult:1.15,improvement:15},rare:{label:'Raro',weight:10,mult:1.30,improvement:30},veryrare:{label:'Muito raro',weight:3.5,mult:1.50,improvement:50},epic:{label:'Épico',weight:1.3,mult:1.75,improvement:75},legendary:{label:'Legendário',weight:.2,mult:2,improvement:100}},
+ rarities:{common:{label:'Comum',weight:54,mult:1,improvement:0},uncommon:{label:'Incomum',weight:26,mult:1.15,improvement:15},rare:{label:'Raro',weight:12,mult:1.30,improvement:30},veryrare:{label:'Muito raro',weight:5,mult:1.50,improvement:50},epic:{label:'Épico',weight:2.5,mult:1.75,improvement:75},legendary:{label:'Legendário',weight:.5,mult:2,improvement:100}},
  progression:{xpRate:.84,xpBase:105,xpExponent:1.3,pointsPerLevel:5,monsterXpBase:20,monsterXpFactor:16,monsterXpExponent:1.5},
  monsters:{populationBase:30,populationPerZone:5,levelWeights:[60,30,10],levelCuts:[.4,.75],hpBase:24,hpPerLevel:8,hpPower:1.65,hpExponent:1.7,hpZoneScale:.20,attackBase:5,attackPerLevel:2,attackPower:.45,attackExponent:1.25,attackZoneScale:.16,defenseBase:1,defensePerLevel:.8,defensePower:.16,defenseExponent:1.2,defenseZoneScale:.13,respawnMs:10000},
  combat:{archerDexDamage:.55,mageSplashRadius:50,mageSplashDamage:.44,warriorHpMultiplier:1.20,warriorAttackDelay:900,archerAttackDelay:750,mageAttackDelay:950},
- economy:{goldMin:10,goldMax:15,goldPerLevel:3.2,stoneChanceBase:.065,stoneChancePerLevel:.0015,stoneChanceCap:.22},
+ economy:{goldMin:10,goldMax:15,goldPerLevel:3.2},
  selling:{basePrice:12,levelFactor:2,tierFactor:4,refineFactor:8,rarityMultipliers:{common:1,uncommon:1.5,rare:2.5,veryrare:4,epic:7,legendary:12}}
 };
 const GAME_STORAGE_KEY='eldoria-rules-v51';
