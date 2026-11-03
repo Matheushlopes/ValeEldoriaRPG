@@ -36,7 +36,7 @@ const GAME_DEFAULTS={
  economy:{goldMin:10,goldMax:15,goldPerLevel:3.2,stoneChanceBase:.065,stoneChancePerLevel:.0015,stoneChanceCap:.22},
  selling:{basePrice:12,levelFactor:2,tierFactor:4,refineFactor:8,rarityMultipliers:{common:1,uncommon:1.5,rare:2.5,veryrare:4,epic:7,legendary:12}}
 };
-const GAME_STORAGE_KEY='eldoria-rules-v1';
+const GAME_STORAGE_KEY='eldoria-rules-v51';
 function mergeRules(base,patch){if(!patch||typeof patch!=='object'||Array.isArray(patch))return base;for(const [key,value] of Object.entries(patch)){if(!(key in base))continue;if(Array.isArray(base[key])){if(Array.isArray(value)&&value.length===base[key].length)base[key]=value;}else if(base[key]&&typeof base[key]==='object')mergeRules(base[key],value);else if(typeof value===typeof base[key])base[key]=value;}return base;}
 function loadRules(){const data=JSON.parse(JSON.stringify(GAME_DEFAULTS));try{mergeRules(data,JSON.parse(localStorage.getItem(GAME_STORAGE_KEY)||'{}'));}catch(e){console.warn('Configuração inválida, usando padrão',e);}return data;}
 const GAME_RULES=loadRules();

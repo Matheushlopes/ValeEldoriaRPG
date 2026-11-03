@@ -4,7 +4,7 @@ import time
 from fastapi import WebSocket
 from app.core.settings import MAX_PLAYERS, WORLD_HEIGHT, WORLD_WIDTH
 from app.services.characters import save_position
-from app.services.monsters import MonsterService
+from app.services.monsters import MonsterService, zone_at
 from app.services import loot
 from app.repositories.database import connection
 
@@ -123,8 +123,10 @@ class World:
         while True:
             await asyncio.sleep(.1)
             async with self.lock:
-                self.monsters.tick(.1)
-                events = self.monsters.combat_tick(self.players, .1)
+                active_zones = {zone_at(p['x'], p['y']) for p in self.players.values()}
+                active_zones.discard(-1)
+                self.monsters.tick(.1, active_zones)
+                events = self.monsters.combat_tick(self.players, .1, active_zones)
                 for event in events:
                     if event['type'] == 'player_hit':
                         with connection() as db:

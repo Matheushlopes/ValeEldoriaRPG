@@ -9,6 +9,9 @@ from app.core.settings import SPAWN_X, SPAWN_Y
 TILE = 32
 RANGES = [(1, 9), (10, 19), (20, 29), (30, 44), (45, 59), (60, 79), (80, 99), (100, 140)]
 TYPES = [('slime','rat'), ('rat','wolf'), ('wolf','goblin'), ('goblin','orc'), ('skeleton','orc'), ('orc','king'), ('skeleton','king','orc'), ('king','orc','skeleton')]
+# Menos monstros por zona; XP/ouro por abate compensam a densidade menor.
+ZONE_COUNTS = (27, 26, 26, 27, 30, 33, 36, 33)
+ZONE_REWARD_MULTIPLIERS = (1.11, 1.35, 1.54, 1.67, 1.82, 1.97, 2.08, 2.27)
 CLASS = {
     'warrior': {'str': 1.65, 'dex': 0, 'mult': 1.08, 'delay': .9, 'speed': .6, 'dex_speed': .0045, 'range': 75},
     'archer': {'str': .85, 'dex': 1.15, 'mult': 1.12, 'delay': .75, 'speed': .88, 'dex_speed': .007, 'range': 265},
@@ -53,7 +56,7 @@ class MonsterService:
         self.rng = random.Random(4321)
         for zone, (low, high) in enumerate(RANGES):
             col, row = zone % 4, zone // 4
-            for _ in range(30+zone*5):
+            for _ in range(ZONE_COUNTS[zone]):
                 x = self.rng.randint(col*20+3, (col+1)*20-3)*TILE+16
                 y = self.rng.randint(3 if row==0 else 32, 24 if row==0 else 52)*TILE+16
                 span=high-low+1
@@ -68,9 +71,11 @@ class MonsterService:
         r2=radius*radius
         return [m.public() for m in self.mobs.values() if (m.x-x)**2+(m.y-y)**2 <= r2]
 
-    def tick(self, dt):
+    def tick(self, dt, active_zones=None):
         now=time.monotonic()
         for m in self.mobs.values():
+            if active_zones is not None and m.zone not in active_zones:
+                continue
             if m.hp <= 0:
                 if now >= m.respawn_at:
                     m.hp=max_hp(m.level);m.x=m.spawn_x;m.y=m.spawn_y
@@ -92,11 +97,13 @@ class MonsterService:
                 else:
                     m.wander_until=0
 
-    def combat_tick(self, players, dt):
+    def combat_tick(self, players, dt, active_zones=None):
         """Aggro e dano calculados exclusivamente no servidor; um alvo por monstro."""
         now = time.monotonic()
         events = []
         for m in self.mobs.values():
+            if active_zones is not None and m.zone not in active_zones:
+                continue
             if m.hp <= 0:
                 continue
             candidates = [(math.hypot(m.x-p['x'], m.y-p['y']), p)
@@ -156,8 +163,8 @@ class MonsterService:
         result={'type':'mob_hit','mob_id':m.id,'hp':m.hp,'hit':hit,'by':pid,'x':m.x,'y':m.y}
         if m.hp==0:
             m.respawn_at=now+10
-            xp=round((20+16*m.level**1.5)*.84)
-            gold=self.rng.randint(10,15)+round(m.level*3.2)
+            xp=round((20+16*m.level**1.5)*.84*ZONE_REWARD_MULTIPLIERS[m.zone])
+            gold=round((self.rng.randint(10,15)+m.level*3.2)*ZONE_REWARD_MULTIPLIERS[m.zone])
             result.update(kill=True, killer=pid, xp=xp, gold=gold)
             self.reward(player,xp,gold)
         return result
