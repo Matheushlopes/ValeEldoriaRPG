@@ -128,6 +128,17 @@ const Online = (() => {
           if(message.class_id!=='warrior') remoteShots.push({x:message.x,y:message.y,tx:message.target_x,ty:message.target_y,type:message.class_id==='archer'?'arrow':'fire',start:performance.now(),duration:message.class_id==='archer'?430:650});
         }
       }
+      if (message.type === 'player_hit' && message.player_id === selfId) {
+        hero.hp = message.hp;
+        floatText(player.x,player.y-28,`-${message.hit}`,'#ff8585');
+        updateHud();
+      }
+      if (message.type === 'player_respawn' && message.player_id === selfId) {
+        player.x=message.x;player.y=message.y;
+        hero.hp=message.hp;hero.gold=message.gold;
+        show(`💀 Você caiu! Perdeu ${message.lost_gold} ouro.`);
+        updateHud();
+      }
       if (message.type === 'reward') {
         hero.xp=message.xp;hero.gold=message.gold;hero.level=message.level;hero.points=message.points;
         floatText(player.x,player.y-34,`+${message.gained_xp} XP · +${message.gained_gold} ouro`,'#f7d777');
@@ -168,7 +179,12 @@ const Online = (() => {
         mob={...data,phase:data.id*1.7,spawnX:data.x,spawnY:data.y,
              baseLevel:data.level,aggro:false,nextHit:0,respawnAt:0};
       }
-      Object.assign(mob,data);
+      // Snapshots a 2 Hz: interpolar a posição, sem teletransporte visual.
+      if (mob._targetX === undefined) {mob._targetX=mob.x;mob._targetY=mob.y;}
+      const {x:serverX,y:serverY,...rest}=data;
+      Object.assign(mob,rest);
+      mob._targetX=serverX;mob._targetY=serverY;
+      if(Math.hypot(mob.x-serverX,mob.y-serverY)>180){mob.x=serverX;mob.y=serverY;}
       updated.push(mob);
     }
     monsters.splice(0,monsters.length,...updated);
@@ -179,6 +195,13 @@ const Online = (() => {
   }
   function shared(){return serverMonsters;}
   function tick(now) {
+    if(serverMonsters){
+      for(const mob of monsters){
+        if(mob._targetX === undefined)continue;
+        mob.x+=(mob._targetX-mob.x)*.18;
+        mob.y+=(mob._targetY-mob.y)*.18;
+      }
+    }
     if (!adventureStarted || !socket || socket.readyState !== WebSocket.OPEN) return;
     if (now-lastSent < 150) return;
     lastSent=now;

@@ -4,6 +4,7 @@ import random
 import time
 from dataclasses import dataclass
 from app.repositories.database import connection
+from app.core.settings import SPAWN_X, SPAWN_Y
 
 TILE = 32
 RANGES = [(1, 9), (10, 19), (20, 29), (30, 44), (45, 59), (60, 79), (80, 99), (100, 140)]
@@ -47,6 +48,7 @@ class MonsterService:
     def __init__(self):
         self.mobs = {}
         self.last_attack = {}
+        self.mob_cooldowns = {}
         self.rng = random.Random(4321)
         for zone, (low, high) in enumerate(RANGES):
             col, row = zone % 4, zone // 4
@@ -86,6 +88,46 @@ class MonsterService:
                     m.x,m.y=nx,ny
                 else:
                     m.wander_until=0
+
+    def combat_tick(self, players, dt):
+        """Aggro e dano calculados exclusivamente no servidor; um alvo por monstro."""
+        now = time.monotonic()
+        events = []
+        for m in self.mobs.values():
+            if m.hp <= 0:
+                continue
+            candidates = [(math.hypot(m.x-p['x'], m.y-p['y']), p)
+                          for p in players.values()
+                          if p.get('hp', 0) > 0 and zone_at(p['x'], p['y']) == m.zone]
+            if not candidates:
+                continue
+            distance, target = min(candidates, key=lambda item: item[0])
+            if distance > 205:
+                continue
+            if distance > 35:
+                step = min(distance-35, (24+min(20,m.level*.5))*dt)
+                nx = m.x+(target['x']-m.x)/distance*step
+                ny = m.y+(target['y']-m.y)/distance*step
+                if zone_at(nx,ny) == m.zone:
+                    m.x,m.y=nx,ny
+            if distance > 43 or now < self.mob_cooldowns.get(m.id, 0):
+                continue
+            self.mob_cooldowns[m.id] = now + max(.85, 1.75-m.level*.013)
+            defense = 2 + target['con']*.65
+            attack = 5 + m.level*2 + .45*m.level**1.25
+            hit = max(1, round(attack-defense+self.rng.randint(-2,3)))
+            target['hp'] = max(0, target['hp']-hit)
+            events.append({'type':'player_hit','player_id':target['id'],
+                           'hit':hit,'hp':round(target['hp'],2), 'mob_id':m.id})
+            if target['hp'] <= 0:
+                loss = min(target['gold'], math.ceil(target['gold']*.1))
+                target['gold'] -= loss
+                target['hp'] = target['max_hp']
+                target['x'],target['y'] = SPAWN_X, SPAWN_Y
+                events.append({'type':'player_respawn','player_id':target['id'],
+                               'hp':target['hp'],'x':target['x'],'y':target['y'],
+                               'gold':target['gold'],'lost_gold':loss})
+        return events
 
     def hit(self, player, monster_id, magic=False):
         """O cliente informa apenas o alvo. O servidor calcula dano e valida alcance/cooldown."""

@@ -6,6 +6,7 @@ from app.core.settings import MAX_PLAYERS, WORLD_HEIGHT, WORLD_WIDTH
 from app.services.characters import save_position
 from app.services.monsters import MonsterService
 from app.services import loot
+from app.repositories.database import connection
 
 MAX_SPEED = 190.0  # pixels/segundo, margem para bônus de movimento
 
@@ -25,7 +26,8 @@ class World:
             if previous:
                 await previous.close(code=4002)
             player = {k: character[k] for k in ('id','name','class_id','level','x','y','str','int','dex','con','xp','gold','points')}
-            player.update(face='down', last_move=time.monotonic(), last_save=time.monotonic())
+            player.update(face='down', last_move=time.monotonic(), last_save=time.monotonic(),
+                          hp=float(character['hp']), max_hp=round((75+character['con']*{'warrior':7.2,'archer':3.6,'mage':2.4}.get(character['class_id'],7.2))*(1.2 if character['class_id']=='warrior' else 1)))
             self.players[character['id']] = player
             self.sockets[character['id']] = socket
         await socket.send_json({'type': 'welcome', 'self': player['id'], 'players': self.snapshot(), 'monsters': self.monsters.nearby(player['x'],player['y']), 'inventory': loot.list_items(character['id'])})
@@ -67,6 +69,7 @@ class World:
             if player:
                 for key in ('str', 'int', 'dex', 'con', 'points'):
                     player[key] = attributes[key]
+                player['max_hp'] = round((75+player['con']*{'warrior':7.2,'archer':3.6,'mage':2.4}.get(player['class_id'],7.2))*(1.2 if player['class_id']=='warrior' else 1))
 
     async def attack(self, character_id: int, message: dict):
         async with self.lock:
@@ -119,7 +122,24 @@ class World:
         elapsed = 0.0
         while True:
             await asyncio.sleep(.1)
-            self.monsters.tick(.1)
+            async with self.lock:
+                self.monsters.tick(.1)
+                events = self.monsters.combat_tick(self.players, .1)
+                for event in events:
+                    if event['type'] == 'player_hit':
+                        with connection() as db:
+                            db.execute('UPDATE characters SET hp=? WHERE id=?', (event['hp'],event['player_id']))
+                    elif event['type'] == 'player_respawn':
+                        with connection() as db:
+                            db.execute('UPDATE characters SET hp=?,x=?,y=?,gold=? WHERE id=?',
+                                       (event['hp'],event['x'],event['y'],event['gold'],event['player_id']))
+            for event in events:
+                socket = self.sockets.get(event['player_id'])
+                if socket:
+                    try:
+                        await socket.send_json(event)
+                    except Exception:
+                        pass
             elapsed += .1
             if self.sockets and elapsed >= .5:
                 await self.broadcast(include_monsters=True)
