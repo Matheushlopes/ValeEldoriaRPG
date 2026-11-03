@@ -179,12 +179,20 @@ const Online = (() => {
         mob={...data,phase:data.id*1.7,spawnX:data.x,spawnY:data.y,
              baseLevel:data.level,aggro:false,nextHit:0,respawnAt:0};
       }
-      // Snapshots a 2 Hz: interpolar a posição, sem teletransporte visual.
-      if (mob._targetX === undefined) {mob._targetX=mob.x;mob._targetY=mob.y;}
+      // Cada snapshot define um trecho temporal; a renderização não depende do FPS.
+      const receivedAt=performance.now();
       const {x:serverX,y:serverY,...rest}=data;
       Object.assign(mob,rest);
+      const gap=Math.hypot(mob.x-serverX,mob.y-serverY);
+      if(gap>150 || mob._targetX===undefined){
+        mob.x=serverX;mob.y=serverY;
+        mob._fromX=serverX;mob._fromY=serverY;
+      }else{
+        mob._fromX=mob.x;mob._fromY=mob.y;
+      }
       mob._targetX=serverX;mob._targetY=serverY;
-      if(Math.hypot(mob.x-serverX,mob.y-serverY)>180){mob.x=serverX;mob.y=serverY;}
+      mob._motionStart=receivedAt;
+      mob._motionDuration=200;
       updated.push(mob);
     }
     monsters.splice(0,monsters.length,...updated);
@@ -198,12 +206,14 @@ const Online = (() => {
     if(serverMonsters){
       for(const mob of monsters){
         if(mob._targetX === undefined)continue;
-        mob.x+=(mob._targetX-mob.x)*.18;
-        mob.y+=(mob._targetY-mob.y)*.18;
+        const t=Math.max(0,Math.min(1,(now-mob._motionStart)/mob._motionDuration));
+        const smooth=t*t*(3-2*t);
+        mob.x=mob._fromX+(mob._targetX-mob._fromX)*smooth;
+        mob.y=mob._fromY+(mob._targetY-mob._fromY)*smooth;
       }
     }
     if (!adventureStarted || !socket || socket.readyState !== WebSocket.OPEN) return;
-    if (now-lastSent < 150) return;
+    if (now-lastSent < 100) return;
     lastSent=now;
     socket.send(JSON.stringify({type:'move',x:player.x,y:player.y,face:player.face}));
   }

@@ -39,6 +39,7 @@ class Monster:
     wander_x: float = 0
     wander_y: float = 0
     wander_until: float = 0
+    aggro_until: float = 0
 
     def public(self):
         return dict(id=self.id, x=round(self.x,1), y=round(self.y,1), zone=self.zone,
@@ -74,6 +75,8 @@ class MonsterService:
                 if now >= m.respawn_at:
                     m.hp=max_hp(m.level);m.x=m.spawn_x;m.y=m.spawn_y
                 continue
+            if now < m.aggro_until:
+                continue
             if now >= m.wander_until:
                 angle=self.rng.random()*math.tau
                 m.wander_x=m.x+math.cos(angle)*self.rng.uniform(30,95)
@@ -104,12 +107,15 @@ class MonsterService:
             distance, target = min(candidates, key=lambda item: item[0])
             if distance > 205:
                 continue
+            m.aggro_until = now + .4  # não misturar patrulha com perseguição
             if distance > 35:
                 step = min(distance-35, (24+min(20,m.level*.5))*dt)
                 nx = m.x+(target['x']-m.x)/distance*step
                 ny = m.y+(target['y']-m.y)/distance*step
                 if zone_at(nx,ny) == m.zone:
                     m.x,m.y=nx,ny
+            # Recalcular após mover; a distância anterior podia gerar hits visuais incoerentes.
+            distance = math.hypot(m.x-target["x"], m.y-target["y"])
             if distance > 43 or now < self.mob_cooldowns.get(m.id, 0):
                 continue
             self.mob_cooldowns[m.id] = now + max(.85, 1.75-m.level*.013)

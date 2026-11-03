@@ -141,7 +141,7 @@ class World:
                     except Exception:
                         pass
             elapsed += .1
-            if self.sockets and elapsed >= .5:
+            if self.sockets and elapsed >= .2:
                 await self.broadcast(include_monsters=True)
                 elapsed = 0.0
 
